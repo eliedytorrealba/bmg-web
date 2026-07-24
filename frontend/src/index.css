@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bmg-dark: #1f1f1d;
+  --color-bmg-blue: #59c7e7;
+  --color-bmg-green: #8be66f;
+  --color-bmg-light: #f5f6f7;
+}
+
+:root {
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  color: #1f1f1d;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  text-decoration: none;
+}
