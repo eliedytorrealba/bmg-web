@@ -8,9 +8,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_filter([
         'http://localhost:5173',
-    ],
+        env('FRONTEND_URL'),
+    ]),
 
     'allowed_origins_patterns' => [],
 
