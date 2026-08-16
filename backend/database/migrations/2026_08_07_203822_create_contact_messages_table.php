@@ -1,42 +1,56 @@
-public function up(): void
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
 {
-    Schema::create('contact_messages', function (Blueprint $table): void {
-        $table->id();
+    public function up(): void
+    {
+        Schema::create('contact_messages', function (Blueprint $table): void {
+            $table->id();
 
-        $table->string(
-            'name',
-            150,
-        );
+            $table->string(
+                'name',
+                150,
+            );
 
-        $table->string(
-            'company',
-            150,
-        )->nullable();
+            $table->string(
+                'company',
+                150,
+            )->nullable();
 
-        $table->string(
-            'email',
-            150,
-        );
+            $table->string(
+                'email',
+                150,
+            );
 
-        $table->string(
-            'phone',
-            20,
-        );
+            $table->string(
+                'phone',
+                20,
+            );
 
-        $table->string(
-            'subject',
-            150,
-        );
+            $table->string(
+                'subject',
+                150,
+            );
 
-        $table->text(
-            'message',
-        );
+            $table->text(
+                'message',
+            );
 
-        $table->string(
-            'status',
-            30,
-        )->default('pending');
+            $table->string(
+                'status',
+                30,
+            )->default('pending');
 
-        $table->timestamps();
-    });
-}
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('contact_messages');
+    }
+};
