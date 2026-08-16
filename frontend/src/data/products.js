@@ -1,0 +1,108 @@
+const products = [
+  {
+    id: 1,
+    code: '102015',
+    name: 'Castrol EDGE 5W-30 LL',
+    brand: 'Castrol',
+    category: 'Lubricantes',
+    presentation: '1 litro',
+    price: 28455,
+    image: null,
+    featured: true,
+    description:
+      'Lubricante sintético para motores que requieren viscosidad 5W-30 y especificaciones de alto rendimiento.',
+  },
+  {
+    id: 2,
+    code: '102028',
+    name: 'Castrol Magnatec 10W-40 A3',
+    brand: 'Castrol',
+    category: 'Lubricantes',
+    presentation: '4 litros',
+    price: 62837,
+    image: null,
+    featured: true,
+    description:
+      'Lubricante semisintético diseñado para brindar protección durante el arranque y la conducción diaria.',
+  },
+  {
+    id: 3,
+    code: '101001',
+    name: 'Aceite Bardahl 2T',
+    brand: 'Bardahl',
+    category: 'Lubricantes',
+    presentation: '250 cc',
+    price: 3600,
+    image: null,
+    featured: false,
+    description:
+      'Aceite para motores de dos tiempos, indicado para diferentes aplicaciones y equipos.',
+  },
+  {
+    id: 4,
+    code: '128315',
+    name: 'Limpia inyector diésel ultra concentrado',
+    brand: 'Bardahl',
+    category: 'Aditivos',
+    presentation: '250 ml',
+    price: 8084,
+    image: null,
+    featured: true,
+    description:
+      'Aditivo concentrado para la limpieza y el mantenimiento del sistema de inyección diésel.',
+  },
+  {
+    id: 5,
+    code: '108025',
+    name: 'Gulf Ultrasynth 0W-20',
+    brand: 'Gulf',
+    category: 'Lubricantes',
+    presentation: '1 litro',
+    price: 14171,
+    image: null,
+    featured: true,
+    description:
+      'Lubricante sintético de baja viscosidad para motores modernos que requieren grado SAE 0W-20.',
+  },
+  {
+    id: 6,
+    code: '110002',
+    name: 'Liqui Moly Cera Tec',
+    brand: 'Liqui Moly',
+    category: 'Aditivos',
+    presentation: '300 ml',
+    price: 80449,
+    image: null,
+    featured: true,
+    description:
+      'Aditivo antifricción para motores y sistemas mecánicos, desarrollado para reducir el desgaste.',
+  },
+  {
+    id: 7,
+    code: '104001',
+    name: 'Filtro de aceite PH4701',
+    brand: 'Fram',
+    category: 'Filtros',
+    presentation: 'Unidad',
+    price: 4889,
+    image: null,
+    featured: true,
+    description:
+      'Filtro de aceite compatible con diferentes modelos Chevrolet, incluyendo Corsa, Agile, Onix y Meriva.',
+  },
+  {
+    id: 8,
+    code: '128266',
+    name: 'Renovador de neumáticos en espuma',
+    brand: 'Walker',
+    category: 'Cosmética',
+    presentation: 'Unidad',
+    price: 4244,
+    image: null,
+    featured: false,
+    description:
+      'Producto para limpieza, recuperación y protección visual de neumáticos.',
+  },
+]
+
+export default products
