@@ -40,4 +40,4 @@ RUN mkdir -p \
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan bmg:import-products && php artisan db:seed --class=TestUsersSeeder --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
