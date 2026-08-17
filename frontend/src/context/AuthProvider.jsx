@@ -14,6 +14,17 @@ function AuthProvider({ children }) {
     useState(true)
 
   const fetchUser = useCallback(async () => {
+    const token =
+      localStorage.getItem('auth_token')
+
+    if (!token) {
+      setUser(null)
+      return null
+    }
+
+    api.defaults.headers.common.Authorization =
+      `Bearer ${token}`
+
     try {
       const response =
         await api.get('/api/me')
@@ -23,7 +34,15 @@ function AuthProvider({ children }) {
       return response.data.data.user
     } catch (error) {
       if (error.response?.status === 401) {
+        localStorage.removeItem(
+          'auth_token',
+        )
+
+        delete api.defaults.headers.common
+          .Authorization
+
         setUser(null)
+
         return null
       }
 
@@ -54,10 +73,6 @@ function AuthProvider({ children }) {
       password,
       remember = false,
     }) => {
-      await api.get(
-        '/sanctum/csrf-cookie',
-      )
-
       const response = await api.post(
         '/api/login',
         {
@@ -69,6 +84,17 @@ function AuthProvider({ children }) {
 
       const authenticatedUser =
         response.data.data.user
+
+      const token =
+        response.data.data.token
+
+      localStorage.setItem(
+        'auth_token',
+        token,
+      )
+
+      api.defaults.headers.common.Authorization =
+        `Bearer ${token}`
 
       setUser(authenticatedUser)
 
@@ -95,8 +121,18 @@ function AuthProvider({ children }) {
   )
 
   const logout = useCallback(async () => {
-    await api.post('/api/logout')
-    setUser(null)
+    try {
+      await api.post('/api/logout')
+    } finally {
+      localStorage.removeItem(
+        'auth_token',
+      )
+
+      delete api.defaults.headers.common
+        .Authorization
+
+      setUser(null)
+    }
   }, [])
 
   const value = useMemo(

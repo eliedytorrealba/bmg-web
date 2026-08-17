@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -14,14 +14,28 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'email' => [
+                'required',
+                'email',
+            ],
+            'password' => [
+                'required',
+                'string',
+            ],
         ]);
 
-        if (! Auth::attempt(
-            $credentials,
-            $request->boolean('remember')
-        )) {
+        $user = User::where(
+            'email',
+            $credentials['email']
+        )->first();
+
+        if (
+            ! $user ||
+            ! Hash::check(
+                $credentials['password'],
+                $user->password
+            )
+        ) {
             throw ValidationException::withMessages([
                 'email' => [
                     'Las credenciales ingresadas no son correctas.',
@@ -29,9 +43,15 @@ class AuthController extends Controller
             ]);
         }
 
-        $request->session()->regenerate();
+        /*
+         * Elimina tokens anteriores para evitar acumular
+         * tokens cada vez que el usuario inicia sesión.
+         */
+        $user->tokens()->delete();
 
-        $user = $request->user();
+        $token = $user
+            ->createToken('bmg-web')
+            ->plainTextToken;
 
         $user->load([
             'priceList:id,code,name,is_general,is_active',
@@ -41,6 +61,7 @@ class AuthController extends Controller
             'message' => 'Inicio de sesión exitoso.',
             'data' => [
                 'user' => $this->userData($user),
+                'token' => $token,
             ],
         ]);
     }
@@ -102,10 +123,12 @@ class AuthController extends Controller
                 ]);
             }
 
-            if (! Hash::check(
-                $validated['current_password'],
-                $user->password
-            )) {
+            if (
+                ! Hash::check(
+                    $validated['current_password'],
+                    $user->password
+                )
+            ) {
                 throw ValidationException::withMessages([
                     'current_password' => [
                         'La contraseña actual no es correcta.',
@@ -140,15 +163,20 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request): JsonResponse
-    {
-        Auth::guard('web')->logout();
+    public function logout(
+        Request $request
+    ): JsonResponse {
+        $token = $request
+            ->user()
+            ?->currentAccessToken();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($token !== null) {
+            $token->delete();
+        }
 
         return response()->json([
-            'message' => 'Sesión cerrada correctamente.',
+            'message' =>
+                'Sesión cerrada correctamente.',
         ]);
     }
 
@@ -160,18 +188,30 @@ class AuthController extends Controller
             'email' => $user->email,
             'phone' => $user->phone,
             'company' => $user->company,
-            'document_type' => $user->document_type,
-            'document_number' => $user->document_number,
+            'document_type' =>
+                $user->document_type,
+            'document_number' =>
+                $user->document_number,
             'role' => $user->role,
-            'price_list' => $user->priceList === null
-                ? null
-                : [
-                    'id' => $user->priceList->id,
-                    'code' => $user->priceList->code,
-                    'name' => $user->priceList->name,
-                    'is_general' => $user->priceList->is_general,
-                    'is_active' => $user->priceList->is_active,
-                ],
+            'price_list' =>
+                $user->priceList === null
+                    ? null
+                    : [
+                        'id' =>
+                            $user->priceList->id,
+                        'code' =>
+                            $user->priceList->code,
+                        'name' =>
+                            $user->priceList->name,
+                        'is_general' =>
+                            $user
+                                ->priceList
+                                ->is_general,
+                        'is_active' =>
+                            $user
+                                ->priceList
+                                ->is_active,
+                    ],
         ];
     }
 }
