@@ -200,7 +200,7 @@ function Header() {
           <img
             src={bmgColorLogo}
             alt="BMG Distribuidora"
-            className="h-16 w-auto object-contain"
+            className="h-16 w-auto object-contain sm:h-18"
           />
         </Link>
 

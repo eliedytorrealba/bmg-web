@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop/ScrollToTop'
 import PublicLayout from './layouts/PublicLayout'
 
 import About from './pages/About/About'
+import AdminDashboard from './pages/Admin/AdminDashboard'
 import Brands from './pages/Brands/Brands'
 import Cart from './pages/Cart/Cart'
 import ClientAddresses from './pages/Profile/ClientAddresses'
@@ -175,6 +176,17 @@ function App() {
                 allowedRoles={['client']}
               >
                 <ClientQuoteDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute
+                allowedRoles={['admin']}
+              >
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />

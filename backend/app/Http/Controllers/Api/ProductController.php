@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,7 +93,7 @@ class ProductController extends Controller
             ],
         ]);
 
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
         $priceListId = $user?->isClient()
             ? $user->price_list_id
@@ -139,14 +140,12 @@ class ProductController extends Controller
                             Builder $searchQuery,
                         ) use ($search): void {
                             $searchQuery
-                                ->where(
+                                ->whereLike(
                                     'name',
-                                    'like',
                                     "%{$search}%",
                                 )
-                                ->orWhere(
+                                ->orWhereLike(
                                     'bcn_code',
-                                    'like',
                                     "%{$search}%",
                                 )
                                 ->orWhereHas(
@@ -155,9 +154,8 @@ class ProductController extends Controller
                                         Builder $brandQuery,
                                     ) =>
                                         $brandQuery
-                                            ->where(
+                                            ->whereLike(
                                                 'name',
-                                                'like',
                                                 "%{$search}%",
                                             ),
                                 )
@@ -167,9 +165,8 @@ class ProductController extends Controller
                                         Builder $categoryQuery,
                                     ) =>
                                         $categoryQuery
-                                            ->where(
+                                            ->orWhereLike(
                                                 'name',
-                                                'like',
                                                 "%{$search}%",
                                             ),
                                 );
@@ -234,7 +231,7 @@ class ProductController extends Controller
                                         $nameQuery
                                             ->orWhere(
                                                 'name',
-                                                'like',
+                                                'ilike',
                                                 "%{$keyword}%",
                                             );
                                     }
@@ -342,7 +339,7 @@ class ProductController extends Controller
         Request $request,
         Product $product,
     ): JsonResponse {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
         $product->load([
             'brand:id,name',

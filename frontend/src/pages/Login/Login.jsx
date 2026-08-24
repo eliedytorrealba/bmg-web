@@ -162,7 +162,7 @@ function Login() {
           </span>
 
           <p className="mt-5 font-semibold text-bmg-blue">
-            Acceso para clientes
+            Acceso a BMG
           </p>
 
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-bmg-dark">
@@ -170,8 +170,7 @@ function Login() {
           </h1>
 
           <p className="mt-3 leading-7 text-neutral-600">
-            Ingresa con tu cuenta para consultar
-            precios y solicitar cotizaciones.
+            Ingresa con tu cuenta para acceder al portal.
           </p>
         </div>
 
@@ -303,20 +302,6 @@ function Login() {
               : 'Iniciar sesión'}
           </button>
         </form>
-
-        <div className="mt-7 rounded-2xl bg-neutral-100 p-4 text-sm leading-6 text-neutral-600">
-          <p className="font-bold text-bmg-dark">
-            Cuenta de prueba
-          </p>
-
-          <p className="mt-2">
-            Correo: cliente@bmg.com
-          </p>
-
-          <p>
-            Contraseña: Cliente1234!
-          </p>
-        </div>
       </section>
     </main>
   )

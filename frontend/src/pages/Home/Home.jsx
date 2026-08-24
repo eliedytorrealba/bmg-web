@@ -1,13 +1,8 @@
 import {
-  CarFront,
   ChevronLeft,
   ChevronRight,
-  Droplets,
-  Filter,
   Headphones,
   PackageCheck,
-  ShieldCheck,
-  Sparkles,
   Truck,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -25,32 +20,37 @@ import walkerLogo from '../../assets/brands/walker.png'
 import homeHero from '../../assets/home/home-hero.jpeg'
 import homeDeposito from '../../assets/home/home-deposito.jpeg'
 import destacado01 from '../../assets/home/destacado-01.jpeg'
+import categoryFiltros from '../../assets/categories/category-filtros.png'
+import categoryLubricantes from '../../assets/categories/category-lubricantes.png'
+import categoryAditivos from '../../assets/categories/category-aditivos.png'
+import categoryCosmetica from '../../assets/categories/category-cosmetica.png'
+import categoryAccesorios from '../../assets/categories/category-accesorios.png'
 
 const categories = [
   {
     name: 'Lubricantes',
     slug: 'lubricants',
-    icon: Droplets,
+    image: categoryLubricantes,
   },
   {
     name: 'Filtros',
     slug: 'filters',
-    icon: Filter,
+    image: categoryFiltros,
   },
   {
     name: 'Aditivos',
     slug: 'additives',
-    icon: ShieldCheck,
+    image: categoryAditivos,
   },
   {
     name: 'Cosmética',
     slug: 'cosmetics',
-    icon: Sparkles,
+    image: categoryCosmetica,
   },
   {
     name: 'Accesorios',
     slug: 'accessories',
-    icon: CarFront,
+    image: categoryAccesorios,
   },
 ]
 
@@ -343,37 +343,34 @@ function Home() {
         </div>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-          {categories.map((category) => {
-            const Icon = category.icon
+  {categories.map((category) => (
+    <Link
+      key={category.name}
+      to={getCategoryPath(category.slug)}
+      aria-label={`Ver productos de la categoría ${category.name}`}
+      className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white text-center shadow-sm transition hover:-translate-y-1 hover:border-bmg-blue hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
+    >
+      <div className="aspect-[4/3] w-full overflow-hidden bg-black">
+  <img
+    src={category.image}
+    alt={`Productos de ${category.name}`}
+    className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+    loading="lazy"
+  />
+</div>
 
-            return (
-              <Link
-                key={category.name}
-                to={getCategoryPath(
-                  category.slug,
-                )}
-                aria-label={`Ver productos de la categoría ${category.name}`}
-                className="group rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-bmg-blue hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
-              >
-                <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-dark transition group-hover:bg-bmg-blue">
-                  <Icon
-                    size={30}
-                    strokeWidth={1.8}
-                    aria-hidden="true"
-                  />
-                </span>
+      <div className="p-5">
+        <h3 className="font-semibold text-bmg-dark">
+          {category.name}
+        </h3>
 
-                <h3 className="mt-5 font-semibold text-bmg-dark">
-                  {category.name}
-                </h3>
-
-                <span className="mt-3 inline-block text-sm font-semibold text-neutral-500 transition group-hover:text-bmg-blue">
-                  Ver productos
-                </span>
-              </Link>
-            )
-          })}
-        </div>
+        <span className="mt-3 inline-block text-sm font-semibold text-neutral-500 transition group-hover:text-bmg-blue">
+          Ver productos
+        </span>
+      </div>
+    </Link>
+  ))}
+</div>
       </section>
 
             {/* MARCAS */}
