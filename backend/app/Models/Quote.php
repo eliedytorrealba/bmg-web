@@ -20,6 +20,7 @@ class Quote extends Model
         'items',
         'total_items',
         'subtotal',
+        'final_total',
         'status',
     ];
 
@@ -29,6 +30,7 @@ class Quote extends Model
             'items' => 'array',
             'total_items' => 'integer',
             'subtotal' => 'decimal:2',
+            'final_total' => 'decimal:2',
         ];
     }
 

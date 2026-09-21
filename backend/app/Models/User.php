@@ -2,29 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-    'name',
-    'email',
-    'phone',
-    'company',
-    'document_type',
-    'document_number',
-    'password',
-    'role',
-    'price_list_id',
-];
+        'name',
+        'email',
+        'phone',
+        'company',
+        'document_type',
+        'document_number',
+        'password',
+        'role',
+        'price_list_id',
+    ];
 
     protected $hidden = [
         'password',
@@ -41,34 +42,38 @@ class User extends Authenticatable
 
     public function addresses(): HasMany
     {
-    return $this->hasMany(
-        UserAddress::class,
-    );
+        return $this->hasMany(
+            UserAddress::class
+        );
     }
 
     public function priceList(): BelongsTo
     {
-        return $this->belongsTo(PriceList::class);
+        return $this->belongsTo(
+            PriceList::class
+        );
     }
 
     public function favoriteProducts(): BelongsToMany
     {
         return $this->belongsToMany(
             Product::class,
-            'favorites',
+            'favorites'
         )->withTimestamps();
     }
 
     public function notifications(): HasMany
     {
-    return $this->hasMany(
-        ClientNotification::class,
-    );
+        return $this->hasMany(
+            ClientNotification::class
+        );
     }
 
     public function quotes(): HasMany
     {
-    return $this->hasMany(Quote::class);
+        return $this->hasMany(
+            Quote::class
+        );
     }
 
     public function isAdmin(): bool

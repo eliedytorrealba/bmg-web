@@ -17,6 +17,7 @@ import {
 } from 'react-router-dom'
 
 import AddToCartButton from '../../components/products/AddToCartButton'
+import useAuth from '../../hooks/useAuth'
 import useFavorites from '../../hooks/useFavorites'
 import {
   getCatalogFilters,
@@ -125,6 +126,11 @@ function Products() {
   ] = useSearchParams()
 
   const {
+  isAuthenticated,
+  isAdmin,
+  } = useAuth()
+
+  const {
     canUseFavorites,
     isFavorite,
     isBusy,
@@ -132,12 +138,6 @@ function Products() {
     errorMessage: favoriteErrorMessage,
   } = useFavorites()
 
-  /*
-   * La URL funciona como fuente de verdad.
-   * Así evitamos sincronizar estados dentro
-   * de efectos y conservamos los filtros
-   * al recargar o compartir la dirección.
-   */
   const searchTerm =
     searchParams.get('buscar') ?? ''
 
@@ -1108,21 +1108,22 @@ function Products() {
                             </p>
 
                             <div className="mt-5 min-h-9">
-                              {product.can_view_price ? (
-                                <p className="break-words text-2xl font-bold text-bmg-dark">
-                                  {currencyFormatter.format(
-                                    Number(
-                                      product.price,
-                                    ),
-                                  )}
-                                </p>
-                              ) : (
-                                <p className="text-lg font-bold text-bmg-blue">
-                                  Inicia sesión
-                                  para consultar
-                                </p>
-                              )}
-                            </div>
+  {product.can_view_price ? (
+    <p className="break-words text-2xl font-bold text-bmg-dark">
+      {currencyFormatter.format(
+        Number(product.price),
+      )}
+    </p>
+  ) : !isAuthenticated ? (
+    <p className="text-lg font-bold text-bmg-blue">
+      Inicia sesión para consultar
+    </p>
+  ) : !isAdmin ? (
+    <p className="text-lg font-bold text-bmg-blue">
+      Precio no disponible
+    </p>
+  ) : null}
+</div>
 
                             <div className="mt-6 grid gap-3">
                               <Link

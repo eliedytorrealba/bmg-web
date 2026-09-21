@@ -4,9 +4,11 @@ import {
   LockKeyhole,
   LogIn,
   Mail,
+  UserPlus,
 } from 'lucide-react'
 import { useState } from 'react'
 import {
+  Link,
   Navigate,
   useLocation,
   useNavigate,
@@ -302,6 +304,24 @@ function Login() {
               : 'Iniciar sesión'}
           </button>
         </form>
+
+        <div className="mt-8 border-t border-neutral-200 pt-6 text-center">
+          <p className="text-sm text-neutral-600">
+            ¿No tienes una cuenta?
+          </p>
+
+          <Link
+            to="/registro"
+            className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-bmg-blue bg-white px-5 py-2 text-sm font-bold text-bmg-blue transition hover:bg-bmg-blue hover:text-bmg-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+          >
+            <UserPlus
+              size={17}
+              aria-hidden="true"
+            />
+
+            Crear cuenta
+          </Link>
+        </div>
       </section>
     </main>
   )

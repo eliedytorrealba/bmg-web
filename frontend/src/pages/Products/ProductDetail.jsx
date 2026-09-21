@@ -80,11 +80,15 @@ function ProductDetail() {
   const [errorMessage, setErrorMessage] =
     useState('')
 
-  const canSelectQuantity =
+  const isClient =
     !isAuthLoading &&
     isAuthenticated &&
     !isAdmin &&
     user?.role === 'client'
+
+  const canSelectQuantity =
+    isClient &&
+    product?.can_view_price === true
 
   useEffect(() => {
     let isMounted = true
@@ -308,45 +312,45 @@ function ProductDetail() {
               </h1>
 
               {canUseFavorites && (
-  <button
-    type="button"
-    onClick={() =>
-      toggleFavorite(product.id)
-    }
-    disabled={isBusy(product.id)}
-    aria-pressed={
-      isFavorite(product.id)
-    }
-    className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 py-2.5 text-sm font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
-  >
-    <Heart
-      size={16}
-      fill={
-        isFavorite(product.id)
-          ? 'currentColor'
-          : 'none'
-      }
-      aria-hidden="true"
-    />
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleFavorite(product.id)
+                  }
+                  disabled={isBusy(product.id)}
+                  aria-pressed={
+                    isFavorite(product.id)
+                  }
+                  className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 py-2.5 text-sm font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                >
+                  <Heart
+                    size={16}
+                    fill={
+                      isFavorite(product.id)
+                        ? 'currentColor'
+                        : 'none'
+                    }
+                    aria-hidden="true"
+                  />
 
-    <span className="text-sm font-bold">
-      {isBusy(product.id)
-        ? 'Actualizando...'
-        : isFavorite(product.id)
-          ? 'Quitar de Favoritos'
-          : 'Agregar a Favoritos'}
-    </span>
-  </button>
-)}
+                  <span className="text-sm font-bold">
+                    {isBusy(product.id)
+                      ? 'Actualizando...'
+                      : isFavorite(product.id)
+                        ? 'Quitar de Favoritos'
+                        : 'Agregar a Favoritos'}
+                  </span>
+                </button>
+              )}
 
-{favoriteErrorMessage && (
-  <p
-    role="alert"
-    className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
-  >
-    {favoriteErrorMessage}
-  </p>
-)}
+              {favoriteErrorMessage && (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+                >
+                  {favoriteErrorMessage}
+                </p>
+              )}
 
               <p className="mt-4 break-all text-sm font-semibold text-neutral-500">
                 Código: {product.code}
@@ -363,6 +367,29 @@ function ProductDetail() {
                       {currencyFormatter.format(
                         Number(product.price),
                       )}
+                    </p>
+                  </>
+                ) : isAdmin ? (
+                  <>
+                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                      Precio
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold text-bmg-dark">
+                      Disponible según la lista
+                      de precios asignada al
+                      cliente
+                    </p>
+                  </>
+                ) : isAuthenticated ? (
+                  <>
+                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                      Precio
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold text-bmg-blue">
+                      Precio no disponible para
+                      esta cuenta
                     </p>
                   </>
                 ) : (
@@ -419,37 +446,113 @@ function ProductDetail() {
                 </h2>
 
                 <ul className="mt-5 space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
-                      <Check
-                        size={15}
-                        strokeWidth={3}
-                        aria-hidden="true"
-                      />
-                    </span>
+                  {isAdmin ? (
+                    <>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
 
-                    <span className="text-sm leading-6 text-neutral-600">
-                      Los precios y las condiciones
-                      comerciales están disponibles
-                      para clientes registrados.
-                    </span>
-                  </li>
+                        <span className="text-sm leading-6 text-neutral-600">
+                          Los precios dependen de
+                          la lista de precios
+                          asignada a cada cliente.
+                        </span>
+                      </li>
 
-                  <li className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
-                      <Check
-                        size={15}
-                        strokeWidth={3}
-                        aria-hidden="true"
-                      />
-                    </span>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
 
-                    <span className="text-sm leading-6 text-neutral-600">
-                      Inicia sesión para agregar
-                      productos y solicitar una
-                      cotización.
-                    </span>
-                  </li>
+                        <span className="text-sm leading-6 text-neutral-600">
+                          La compra y solicitud de
+                          cotización están
+                          disponibles para cuentas
+                          de cliente.
+                        </span>
+                      </li>
+                    </>
+                  ) : isClient ? (
+                    <>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span className="text-sm leading-6 text-neutral-600">
+                          El precio mostrado
+                          corresponde a tu lista
+                          de precios asignada.
+                        </span>
+                      </li>
+
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span className="text-sm leading-6 text-neutral-600">
+                          Puedes agregar productos
+                          y solicitar una
+                          cotización desde tu
+                          cuenta.
+                        </span>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span className="text-sm leading-6 text-neutral-600">
+                          Los precios y las
+                          condiciones comerciales
+                          están disponibles para
+                          clientes registrados.
+                        </span>
+                      </li>
+
+                      <li className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                          <Check
+                            size={15}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span className="text-sm leading-6 text-neutral-600">
+                          Inicia sesión para
+                          agregar productos y
+                          solicitar una
+                          cotización.
+                        </span>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
 
@@ -504,17 +607,19 @@ function ProductDetail() {
                 </div>
               )}
 
-              <div className="mt-8">
-                <AddToCartButton
-                  product={cartProduct}
-                  quantity={
-                    canSelectQuantity
-                      ? quantity
-                      : 1
-                  }
-                  className="max-w-xl"
-                />
-              </div>
+              {isClient && (
+                <div className="mt-8">
+                  <AddToCartButton
+                    product={cartProduct}
+                    quantity={
+                      canSelectQuantity
+                        ? quantity
+                        : 1
+                    }
+                    className="max-w-xl"
+                  />
+                </div>
+              )}
             </section>
           </div>
         </div>

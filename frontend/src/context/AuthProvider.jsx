@@ -13,6 +13,21 @@ function AuthProvider({ children }) {
   const [isLoading, setIsLoading] =
     useState(true)
 
+  const setAuthenticatedSession =
+    useCallback((authenticatedUser, token) => {
+      localStorage.setItem(
+        'auth_token',
+        token,
+      )
+
+      api.defaults.headers.common.Authorization =
+        `Bearer ${token}`
+
+      setUser(authenticatedUser)
+
+      return authenticatedUser
+    }, [])
+
   const fetchUser = useCallback(async () => {
     const token =
       localStorage.getItem('auth_token')
@@ -88,19 +103,35 @@ function AuthProvider({ children }) {
       const token =
         response.data.data.token
 
-      localStorage.setItem(
-        'auth_token',
+      return setAuthenticatedSession(
+        authenticatedUser,
+        token,
+      )
+    },
+    [setAuthenticatedSession],
+  )
+
+  const register = useCallback(
+    async (registrationData) => {
+      const response = await api.post(
+        '/api/register',
+        registrationData,
+      )
+
+      const authenticatedUser =
+        response.data.data.user
+
+      const token =
+        response.data.data.token
+
+      setAuthenticatedSession(
+        authenticatedUser,
         token,
       )
 
-      api.defaults.headers.common.Authorization =
-        `Bearer ${token}`
-
-      setUser(authenticatedUser)
-
-      return authenticatedUser
+      return response.data
     },
-    [],
+    [setAuthenticatedSession],
   )
 
   const updateProfile = useCallback(
@@ -143,6 +174,7 @@ function AuthProvider({ children }) {
       isAdmin: user?.role === 'admin',
       isClient: user?.role === 'client',
       login,
+      register,
       logout,
       fetchUser,
       updateProfile,
@@ -151,6 +183,7 @@ function AuthProvider({ children }) {
       user,
       isLoading,
       login,
+      register,
       logout,
       fetchUser,
       updateProfile,

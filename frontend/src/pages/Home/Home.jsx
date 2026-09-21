@@ -5,8 +5,19 @@ import {
   PackageCheck,
   Truck,
 } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+
+import {
+  useEffect,
+  useState,
+} from 'react'
+
+import {
+  Link,
+} from 'react-router-dom'
+
+import {
+  getHighlights,
+} from '../../services/highlightService'
 
 import useAuth from '../../hooks/useAuth'
 
@@ -19,12 +30,18 @@ import walkerLogo from '../../assets/brands/walker.png'
 
 import homeHero from '../../assets/home/home-hero.jpeg'
 import homeDeposito from '../../assets/home/home-deposito.jpeg'
-import destacado01 from '../../assets/home/destacado-01.jpeg'
+
 import categoryFiltros from '../../assets/categories/category-filtros.png'
 import categoryLubricantes from '../../assets/categories/category-lubricantes.png'
 import categoryAditivos from '../../assets/categories/category-aditivos.png'
 import categoryCosmetica from '../../assets/categories/category-cosmetica.png'
 import categoryAccesorios from '../../assets/categories/category-accesorios.png'
+
+const HIGHLIGHT_TARGET_RATIO =
+  16 / 7
+
+const HIGHLIGHT_RATIO_TOLERANCE =
+  0.08
 
 const categories = [
   {
@@ -114,34 +131,28 @@ const benefits = [
   },
 ]
 
-const highlights = [
-  {
-    id: 1,
-    image: destacado01,
-    alt: 'Novedad destacada de BMG',
-  },
-  {
-    id: 2,
-    image: null,
-    alt: 'Próximo destacado de BMG',
-  },
-  {
-    id: 3,
-    image: null,
-    alt: 'Próximo destacado de BMG',
-  },
-]
-
-function getCategoryPath(categorySlug) {
+function getCategoryPath(
+  categorySlug,
+) {
   return `/productos?categoryGroup=${encodeURIComponent(
     categorySlug,
   )}`
 }
 
-function getBrandPath(brandName) {
+function getBrandPath(
+  brandName,
+) {
   return `/productos?brand=${encodeURIComponent(
     brandName,
   )}`
+}
+
+function isExternalUrl(
+  url,
+) {
+  return /^https?:\/\//i.test(
+    url ?? '',
+  )
 }
 
 function Home() {
@@ -151,30 +162,247 @@ function Home() {
   } = useAuth()
 
   const [
+    highlights,
+    setHighlights,
+  ] = useState([])
+
+  const [
+    isHighlightsLoading,
+    setIsHighlightsLoading,
+  ] = useState(true)
+
+  const [
     activeHighlight,
     setActiveHighlight,
   ] = useState(0)
 
+  const [
+    highlightFillMode,
+    setHighlightFillMode,
+  ] = useState('contain')
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadHighlights() {
+      setIsHighlightsLoading(true)
+
+      try {
+        const data =
+          await getHighlights()
+
+        if (!isMounted) {
+          return
+        }
+
+        setHighlights(data)
+        setActiveHighlight(0)
+        setHighlightFillMode(
+          'contain',
+        )
+      } catch (error) {
+        console.error(
+          'No se pudieron cargar los destacados.',
+          error,
+        )
+
+        if (isMounted) {
+          setHighlights([])
+        }
+      } finally {
+        if (isMounted) {
+          setIsHighlightsLoading(false)
+        }
+      }
+    }
+
+    loadHighlights()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   function showPreviousHighlight() {
-    setActiveHighlight((current) =>
-      current === 0
-        ? highlights.length - 1
-        : current - 1,
+    if (
+      highlights.length <= 1
+    ) {
+      return
+    }
+
+    setHighlightFillMode(
+      'contain',
+    )
+
+    setActiveHighlight(
+      (current) =>
+        current === 0
+          ? highlights.length - 1
+          : current - 1,
     )
   }
 
   function showNextHighlight() {
-    setActiveHighlight((current) =>
-      current === highlights.length - 1
-        ? 0
-        : current + 1,
+    if (
+      highlights.length <= 1
+    ) {
+      return
+    }
+
+    setHighlightFillMode(
+      'contain',
+    )
+
+    setActiveHighlight(
+      (current) =>
+        current ===
+        highlights.length - 1
+          ? 0
+          : current + 1,
+    )
+  }
+
+  function selectHighlight(
+    index,
+  ) {
+    if (
+      index ===
+      activeHighlight
+    ) {
+      return
+    }
+
+    setHighlightFillMode(
+      'contain',
+    )
+
+    setActiveHighlight(
+      index,
+    )
+  }
+
+  function handleHighlightImageLoad(
+    event,
+  ) {
+    const {
+      naturalWidth,
+      naturalHeight,
+    } = event.currentTarget
+
+    if (
+      !naturalWidth ||
+      !naturalHeight
+    ) {
+      setHighlightFillMode(
+        'contain',
+      )
+
+      return
+    }
+
+    const imageRatio =
+      naturalWidth /
+      naturalHeight
+
+    const difference =
+      Math.abs(
+        imageRatio -
+          HIGHLIGHT_TARGET_RATIO,
+      )
+
+    setHighlightFillMode(
+      difference <=
+        HIGHLIGHT_RATIO_TOLERANCE
+        ? 'cover'
+        : 'contain',
+    )
+  }
+
+  const safeActiveHighlight =
+    highlights.length === 0
+      ? 0
+      : Math.min(
+          activeHighlight,
+          highlights.length - 1,
+        )
+
+  const currentHighlight =
+    highlights[
+      safeActiveHighlight
+    ] ?? null
+
+  const shouldUseBlurredBackground =
+    highlightFillMode ===
+    'contain'
+
+  function renderHighlightImage() {
+    if (!currentHighlight) {
+      return null
+    }
+
+    const image = (
+      <img
+        key={
+          currentHighlight.id
+        }
+        src={
+          currentHighlight.image_url
+        }
+        alt={
+          currentHighlight.alt_text
+        }
+        onLoad={
+          handleHighlightImageLoad
+        }
+        className={`h-full w-full object-center ${
+          highlightFillMode ===
+          'cover'
+            ? 'object-cover'
+            : 'object-contain'
+        }`}
+      />
+    )
+
+    if (
+      !currentHighlight.link_url
+    ) {
+      return image
+    }
+
+    if (
+      isExternalUrl(
+        currentHighlight.link_url,
+      )
+    ) {
+      return (
+        <a
+          href={
+            currentHighlight.link_url
+          }
+          target="_blank"
+          rel="noreferrer"
+          className="flex h-full w-full items-center justify-center"
+        >
+          {image}
+        </a>
+      )
+    }
+
+    return (
+      <Link
+        to={
+          currentHighlight.link_url
+        }
+        className="flex h-full w-full items-center justify-center"
+      >
+        {image}
+      </Link>
     )
   }
 
   return (
     <>
-
-             {/* HERO */}
+      {/* HERO */}
       <section className="bg-bmg-light">
         <div className="mx-auto grid min-h-[520px] max-w-7xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:px-8">
           <div className="min-w-0">
@@ -238,90 +466,123 @@ function Home() {
             </p>
           </div>
 
-          <div className="relative mx-auto mt-10 max-w-5xl">
-            <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-black shadow-lg">
-              <div className="flex aspect-[16/7] items-center justify-center">
-                {highlights[
-                  activeHighlight
-                ].image ? (
-                  <img
-                    src={
-                      highlights[
-                        activeHighlight
-                      ].image
-                    }
-                    alt={
-                      highlights[
-                        activeHighlight
-                      ].alt
-                    }
-                    className="h-full w-full object-contain object-center"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-white">
-                    <p className="text-lg font-semibold text-neutral-300">
-                      Próximamente
-                    </p>
-                  </div>
-                )}
+          {isHighlightsLoading ? (
+            <div className="mx-auto mt-10 max-w-5xl">
+              <div className="flex aspect-[16/7] items-center justify-center overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-50 shadow-sm">
+                <p className="font-semibold text-neutral-400">
+                  Cargando destacados...
+                </p>
               </div>
             </div>
+          ) : highlights.length ===
+            0 ? (
+            <div className="mx-auto mt-10 max-w-5xl">
+              <div className="flex aspect-[16/7] items-center justify-center overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-50 shadow-sm">
+                <p className="text-lg font-semibold text-neutral-300">
+                  Próximamente
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="relative mx-auto mt-10 max-w-5xl">
+                <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-lg">
+                  <div className="relative flex aspect-[16/7] items-center justify-center overflow-hidden">
+                    {shouldUseBlurredBackground &&
+                      currentHighlight?.image_url && (
+                        <>
+                          <img
+                            key={`background-${currentHighlight.id}`}
+                            src={
+                              currentHighlight.image_url
+                            }
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+                          />
 
-            <button
-              type="button"
-              onClick={showPreviousHighlight}
-              aria-label="Ver destacado anterior"
-              className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-bmg-dark/90 text-white shadow-lg transition hover:bg-bmg-blue hover:text-bmg-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 sm:left-5"
-            >
-              <ChevronLeft
-                size={24}
-                aria-hidden="true"
-              />
-            </button>
+                          <div className="pointer-events-none absolute inset-0 bg-white/25" />
+                        </>
+                      )}
 
-            <button
-              type="button"
-              onClick={showNextHighlight}
-              aria-label="Ver siguiente destacado"
-              className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-bmg-dark/90 text-white shadow-lg transition hover:bg-bmg-blue hover:text-bmg-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 sm:right-5"
-            >
-              <ChevronRight
-                size={24}
-                aria-hidden="true"
-              />
-            </button>
-          </div>
+                    <div className="relative z-10 flex h-full w-full items-center justify-center">
+                      {renderHighlightImage()}
+                    </div>
+                  </div>
+                </div>
 
-          <div className="mt-6 flex justify-center gap-2">
-            {highlights.map(
-              (highlight, index) => (
-                <button
-                  key={highlight.id}
-                  type="button"
-                  onClick={() =>
-                    setActiveHighlight(
+                {highlights.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={
+                        showPreviousHighlight
+                      }
+                      aria-label="Ver destacado anterior"
+                      className="absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-bmg-dark/90 text-white shadow-lg transition hover:bg-bmg-blue hover:text-bmg-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 sm:left-5"
+                    >
+                      <ChevronLeft
+                        size={24}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={
+                        showNextHighlight
+                      }
+                      aria-label="Ver siguiente destacado"
+                      className="absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-bmg-dark/90 text-white shadow-lg transition hover:bg-bmg-blue hover:text-bmg-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 sm:right-5"
+                    >
+                      <ChevronRight
+                        size={24}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {highlights.length > 1 && (
+                <div className="mt-6 flex justify-center gap-2">
+                  {highlights.map(
+                    (
+                      highlight,
                       index,
-                    )
-                  }
-                  aria-label={`Ver destacado ${
-                    index + 1
-                  }`}
-                  aria-current={
-                    activeHighlight ===
-                    index
-                      ? 'true'
-                      : undefined
-                  }
-                  className={`h-2.5 rounded-full transition-all ${
-                    activeHighlight ===
-                    index
-                      ? 'w-8 bg-bmg-blue'
-                      : 'w-2.5 bg-neutral-300 hover:bg-neutral-400'
-                  }`}
-                />
-              ),
-            )}
-          </div>
+                    ) => (
+                      <button
+                        key={
+                          highlight.id
+                        }
+                        type="button"
+                        onClick={() =>
+                          selectHighlight(
+                            index,
+                          )
+                        }
+                        aria-label={`Ver destacado ${
+                          index + 1
+                        }`}
+                        aria-current={
+                          safeActiveHighlight ===
+                          index
+                            ? 'true'
+                            : undefined
+                        }
+                        className={`h-2.5 rounded-full transition-all ${
+                          safeActiveHighlight ===
+                          index
+                            ? 'w-8 bg-bmg-blue'
+                            : 'w-2.5 bg-neutral-300 hover:bg-neutral-400'
+                        }`}
+                      />
+                    ),
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -343,37 +604,45 @@ function Home() {
         </div>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-  {categories.map((category) => (
-    <Link
-      key={category.name}
-      to={getCategoryPath(category.slug)}
-      aria-label={`Ver productos de la categoría ${category.name}`}
-      className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white text-center shadow-sm transition hover:-translate-y-1 hover:border-bmg-blue hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
-    >
-      <div className="aspect-[4/3] w-full overflow-hidden bg-black">
-  <img
-    src={category.image}
-    alt={`Productos de ${category.name}`}
-    className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
-    loading="lazy"
-  />
-</div>
+          {categories.map(
+            (category) => (
+              <Link
+                key={category.name}
+                to={getCategoryPath(
+                  category.slug,
+                )}
+                aria-label={`Ver productos de la categoría ${category.name}`}
+                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white text-center shadow-sm transition hover:-translate-y-1 hover:border-bmg-blue hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
+              >
+                <div className="aspect-[4/3] w-full overflow-hidden bg-black">
+                  <img
+                    src={
+                      category.image
+                    }
+                    alt={`Productos de ${category.name}`}
+                    className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                </div>
 
-      <div className="p-5">
-        <h3 className="font-semibold text-bmg-dark">
-          {category.name}
-        </h3>
+                <div className="p-5">
+                  <h3 className="font-semibold text-bmg-dark">
+                    {
+                      category.name
+                    }
+                  </h3>
 
-        <span className="mt-3 inline-block text-sm font-semibold text-neutral-500 transition group-hover:text-bmg-blue">
-          Ver productos
-        </span>
-      </div>
-    </Link>
-  ))}
-</div>
+                  <span className="mt-3 inline-block text-sm font-semibold text-neutral-500 transition group-hover:text-bmg-blue">
+                    Ver productos
+                  </span>
+                </div>
+              </Link>
+            ),
+          )}
+        </div>
       </section>
 
-            {/* MARCAS */}
+      {/* MARCAS */}
       <section className="bg-bmg-dark text-white">
         <div className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
           <div className="text-center">
@@ -394,23 +663,27 @@ function Home() {
           </div>
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {brands.map((brand) => (
-              <Link
-                key={brand.name}
-                to={getBrandPath(
-                  brand.name,
-                )}
-                aria-label={`Ver productos de ${brand.name}`}
-                className="group flex min-h-44 items-center justify-center rounded-3xl border border-white/10 bg-white px-8 py-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-bmg-blue hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4 focus-visible:ring-offset-bmg-dark"
-              >
-                <img
-                  src={brand.logo}
-                  alt={`Logo de ${brand.name}`}
-                  className={`${brand.imageClassName} h-auto w-auto object-contain transition duration-300 group-hover:scale-105`}
-                  loading="lazy"
-                />
-              </Link>
-            ))}
+            {brands.map(
+              (brand) => (
+                <Link
+                  key={brand.name}
+                  to={getBrandPath(
+                    brand.name,
+                  )}
+                  aria-label={`Ver productos de ${brand.name}`}
+                  className="group flex min-h-44 items-center justify-center rounded-3xl border border-white/10 bg-white px-8 py-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-bmg-blue hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4 focus-visible:ring-offset-bmg-dark"
+                >
+                  <img
+                    src={
+                      brand.logo
+                    }
+                    alt={`Logo de ${brand.name}`}
+                    className={`${brand.imageClassName} h-auto w-auto object-contain transition duration-300 group-hover:scale-105`}
+                    loading="lazy"
+                  />
+                </Link>
+              ),
+            )}
           </div>
 
           <div className="mt-10 text-center">
@@ -460,32 +733,43 @@ function Home() {
             </p>
 
             <div className="mt-8 grid gap-5 sm:grid-cols-3">
-              {benefits.map((benefit) => {
-                const Icon = benefit.icon
+              {benefits.map(
+                (benefit) => {
+                  const Icon =
+                    benefit.icon
 
-                return (
-                  <article
-                    key={benefit.title}
-                    className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bmg-green/30 text-bmg-dark">
-                      <Icon
-                        size={24}
-                        strokeWidth={1.8}
-                        aria-hidden="true"
-                      />
-                    </div>
+                  return (
+                    <article
+                      key={
+                        benefit.title
+                      }
+                      className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bmg-green/30 text-bmg-dark">
+                        <Icon
+                          size={24}
+                          strokeWidth={
+                            1.8
+                          }
+                          aria-hidden="true"
+                        />
+                      </div>
 
-                    <h3 className="mt-4 font-bold text-bmg-dark">
-                      {benefit.title}
-                    </h3>
+                      <h3 className="mt-4 font-bold text-bmg-dark">
+                        {
+                          benefit.title
+                        }
+                      </h3>
 
-                    <p className="mt-2 text-sm leading-6 text-neutral-600">
-                      {benefit.description}
-                    </p>
-                  </article>
-                )
-              })}
+                      <p className="mt-2 text-sm leading-6 text-neutral-600">
+                        {
+                          benefit.description
+                        }
+                      </p>
+                    </article>
+                  )
+                },
+              )}
             </div>
 
             <Link

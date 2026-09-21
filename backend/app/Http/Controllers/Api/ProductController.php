@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
@@ -54,8 +55,9 @@ class ProductController extends Controller
         ],
     ];
 
-    public function index(Request $request): JsonResponse
-    {
+    public function index(
+        Request $request,
+    ): JsonResponse {
         $request->validate([
             'search' => [
                 'nullable',
@@ -78,6 +80,7 @@ class ProductController extends Controller
             'category_group' => [
                 'nullable',
                 'string',
+
                 Rule::in(
                     array_keys(
                         self::CATEGORY_GROUPS,
@@ -93,168 +96,278 @@ class ProductController extends Controller
             ],
         ]);
 
-        $user = Auth::guard('sanctum')->user();
+        $user =
+            Auth::guard(
+                'sanctum',
+            )->user();
 
-        $priceListId = $user?->isClient()
-            ? $user->price_list_id
-            : null;
+        $priceListId =
+            $user?->isClient()
+                ? $user->price_list_id
+                : null;
 
-        $products = Product::query()
-            ->with([
-                'brand:id,name',
-                'category:id,name',
-            ])
-            ->when(
-                $priceListId !== null,
-                fn (Builder $query) =>
-                    $query->with([
-                        'priceListItems' =>
-                            fn ($priceQuery) =>
-                                $priceQuery
-                                    ->select([
-                                        'id',
-                                        'price_list_id',
-                                        'product_id',
-                                        'price',
-                                        'discount_percentage',
-                                    ])
-                                    ->where(
-                                        'price_list_id',
-                                        $priceListId,
-                                    ),
-                    ]),
-            )
-            ->when(
-                $request->filled('search'),
-                function (
-                    Builder $query,
-                ) use ($request): void {
-                    $search = trim(
-                        (string) $request->input(
-                            'search',
-                        ),
-                    );
+        $products =
+            Product::query()
+                ->with([
+                    'brand:id,name',
+                    'category:id,name',
+                ])
 
-                    $query->where(
-                        function (
-                            Builder $searchQuery,
-                        ) use ($search): void {
-                            $searchQuery
-                                ->whereLike(
-                                    'name',
-                                    "%{$search}%",
-                                )
-                                ->orWhereLike(
-                                    'bcn_code',
-                                    "%{$search}%",
-                                )
-                                ->orWhereHas(
-                                    'brand',
-                                    fn (
-                                        Builder $brandQuery,
-                                    ) =>
-                                        $brandQuery
-                                            ->whereLike(
-                                                'name',
-                                                "%{$search}%",
-                                            ),
-                                )
-                                ->orWhereHas(
-                                    'category',
-                                    fn (
-                                        Builder $categoryQuery,
-                                    ) =>
-                                        $categoryQuery
-                                            ->orWhereLike(
-                                                'name',
-                                                "%{$search}%",
-                                            ),
+                /*
+                |--------------------------------------------------------------------------
+                | Catálogo según lista de precios
+                |--------------------------------------------------------------------------
+                |
+                | Si el usuario es cliente y tiene una lista asignada,
+                | solamente se muestran los productos que pertenecen
+                | actualmente a esa lista.
+                |
+                */
+
+                ->when(
+                    $priceListId !== null,
+                    function (
+                        Builder $query,
+                    ) use (
+                        $priceListId,
+                    ): void {
+                        $query->whereHas(
+                            'priceListItems',
+                            function (
+                                Builder $priceQuery,
+                            ) use (
+                                $priceListId,
+                            ): void {
+                                $priceQuery->where(
+                                    'price_list_id',
+                                    $priceListId,
                                 );
-                        },
-                    );
-                },
-            )
-            ->when(
-                $request->filled('brand_id'),
-                fn (Builder $query) =>
-                    $query->where(
-                        'brand_id',
-                        $request->integer(
-                            'brand_id',
-                        ),
-                    ),
-            )
-            ->when(
-                $request->filled(
-                    'category_id',
-                ),
-                fn (Builder $query) =>
-                    $query->where(
-                        'category_id',
-                        $request->integer(
-                            'category_id',
-                        ),
-                    ),
-            )
-            ->when(
-                $request->filled(
-                    'category_group',
-                ),
-                function (
-                    Builder $query,
-                ) use ($request): void {
-                    $categoryGroup =
-                        (string) $request->input(
-                            'category_group',
+                            },
                         );
+                    },
+                )
 
-                    $keywords =
-                        self::CATEGORY_GROUPS[
-                            $categoryGroup
-                        ];
+                /*
+                |--------------------------------------------------------------------------
+                | Precio correspondiente a la lista del cliente
+                |--------------------------------------------------------------------------
+                */
 
-                    $query->whereHas(
-                        'category',
-                        function (
-                            Builder $categoryQuery,
-                        ) use ($keywords): void {
-                            $categoryQuery->where(
-                                function (
-                                    Builder $nameQuery,
-                                ) use (
-                                    $keywords,
-                                ): void {
-                                    foreach (
-                                        $keywords as
-                                        $keyword
-                                    ) {
-                                        $nameQuery
-                                            ->orWhere(
-                                                'name',
-                                                'ilike',
-                                                "%{$keyword}%",
-                                            );
-                                    }
-                                },
+                ->when(
+                    $priceListId !== null,
+                    fn (
+                        Builder $query,
+                    ) =>
+                        $query->with([
+                            'priceListItems' =>
+                                fn (
+                                    $priceQuery,
+                                ) =>
+                                    $priceQuery
+                                        ->select([
+                                            'id',
+                                            'price_list_id',
+                                            'product_id',
+                                            'price',
+                                            'discount_percentage',
+                                        ])
+                                        ->where(
+                                            'price_list_id',
+                                            $priceListId,
+                                        ),
+                        ]),
+                )
+
+                /*
+                |--------------------------------------------------------------------------
+                | Búsqueda
+                |--------------------------------------------------------------------------
+                */
+
+                ->when(
+                    $request->filled(
+                        'search',
+                    ),
+                    function (
+                        Builder $query,
+                    ) use (
+                        $request,
+                    ): void {
+                        $search =
+                            trim(
+                                (string) $request->input(
+                                    'search',
+                                ),
                             );
-                        },
-                    );
-                },
-            )
-            ->orderBy('name')
-            ->paginate(
-                $request->integer(
-                    'per_page',
-                    24,
-                ),
-            );
+
+                        $query->where(
+                            function (
+                                Builder $searchQuery,
+                            ) use (
+                                $search,
+                            ): void {
+                                $searchQuery
+                                    ->whereLike(
+                                        'name',
+                                        "%{$search}%",
+                                    )
+                                    ->orWhereLike(
+                                        'bcn_code',
+                                        "%{$search}%",
+                                    )
+                                    ->orWhereHas(
+                                        'brand',
+                                        fn (
+                                            Builder $brandQuery,
+                                        ) =>
+                                            $brandQuery
+                                                ->whereLike(
+                                                    'name',
+                                                    "%{$search}%",
+                                                ),
+                                    )
+                                    ->orWhereHas(
+                                        'category',
+                                        fn (
+                                            Builder $categoryQuery,
+                                        ) =>
+                                            $categoryQuery
+                                                ->whereLike(
+                                                    'name',
+                                                    "%{$search}%",
+                                                ),
+                                    );
+                            },
+                        );
+                    },
+                )
+
+                /*
+                |--------------------------------------------------------------------------
+                | Marca
+                |--------------------------------------------------------------------------
+                */
+
+                ->when(
+                    $request->filled(
+                        'brand_id',
+                    ),
+                    fn (
+                        Builder $query,
+                    ) =>
+                        $query->where(
+                            'brand_id',
+                            $request->integer(
+                                'brand_id',
+                            ),
+                        ),
+                )
+
+                /*
+                |--------------------------------------------------------------------------
+                | Categoría
+                |--------------------------------------------------------------------------
+                */
+
+                ->when(
+                    $request->filled(
+                        'category_id',
+                    ),
+                    fn (
+                        Builder $query,
+                    ) =>
+                        $query->where(
+                            'category_id',
+                            $request->integer(
+                                'category_id',
+                            ),
+                        ),
+                )
+
+                /*
+                |--------------------------------------------------------------------------
+                | Grupo de categoría
+                |--------------------------------------------------------------------------
+                */
+
+                ->when(
+                    $request->filled(
+                        'category_group',
+                    ),
+                    function (
+                        Builder $query,
+                    ) use (
+                        $request,
+                    ): void {
+                        $categoryGroup =
+                            (string) $request->input(
+                                'category_group',
+                            );
+
+                        $keywords =
+                            self::CATEGORY_GROUPS[
+                                $categoryGroup
+                            ];
+
+                        $query->whereHas(
+                            'category',
+                            function (
+                                Builder $categoryQuery,
+                            ) use (
+                                $keywords,
+                            ): void {
+                                $categoryQuery->where(
+                                    function (
+                                        Builder $nameQuery,
+                                    ) use (
+                                        $keywords,
+                                    ): void {
+                                        foreach (
+                                            $keywords as
+                                            $keyword
+                                        ) {
+                                            $nameQuery
+                                                ->orWhere(
+                                                    'name',
+                                                    'like',
+                                                    "%{$keyword}%",
+                                                );
+                                        }
+                                    },
+                                );
+                            },
+                        );
+                    },
+                )
+
+                /*
+                |--------------------------------------------------------------------------
+                | Orden y paginación
+                |--------------------------------------------------------------------------
+                */
+
+                ->orderBy('name')
+                ->paginate(
+                    $request->integer(
+                        'per_page',
+                        24,
+                    ),
+                );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Formato de respuesta
+        |--------------------------------------------------------------------------
+        */
 
         $products
             ->getCollection()
             ->transform(
                 function (
                     Product $product,
-                ) use ($user): array {
+                ) use (
+                    $user,
+                ): array {
                     $data = [
                         'id' =>
                             $product->id,
@@ -264,6 +377,17 @@ class ProductController extends Controller
 
                         'name' =>
                             $product->name,
+
+                        'image_url' =>
+                            $product->image_path
+                                ? url(
+                                    Storage::disk(
+                                        'public',
+                                    )->url(
+                                        $product->image_path,
+                                    ),
+                                )
+                                : null,
 
                         'brand' =>
                             $product->brand === null
@@ -300,17 +424,25 @@ class ProductController extends Controller
                             false,
                     ];
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Precio del cliente
+                    |--------------------------------------------------------------------------
+                    */
+
                     if (
                         $user?->isClient() &&
                         $user->price_list_id !==
                             null
                     ) {
-                        $priceItem = $product
-                            ->priceListItems
-                            ->first();
+                        $priceItem =
+                            $product
+                                ->priceListItems
+                                ->first();
 
                         if (
-                            $priceItem !== null
+                            $priceItem !==
+                            null
                         ) {
                             $data[
                                 'can_view_price'
@@ -321,8 +453,9 @@ class ProductController extends Controller
 
                             $data[
                                 'discount_percentage'
-                            ] = $priceItem
-                                ->discount_percentage;
+                            ] =
+                                $priceItem
+                                    ->discount_percentage;
                         }
                     }
 
@@ -339,20 +472,32 @@ class ProductController extends Controller
         Request $request,
         Product $product,
     ): JsonResponse {
-        $user = Auth::guard('sanctum')->user();
+        $user =
+            Auth::guard(
+                'sanctum',
+            )->user();
 
         $product->load([
             'brand:id,name',
             'category:id,name',
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Cargar precio correspondiente a la lista
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $user?->isClient() &&
-            $user->price_list_id !== null
+            $user->price_list_id !==
+                null
         ) {
             $product->load([
                 'priceListItems' =>
-                    fn ($query) =>
+                    fn (
+                        $query,
+                    ) =>
                         $query
                             ->select([
                                 'id',
@@ -363,13 +508,40 @@ class ProductController extends Controller
                             ])
                             ->where(
                                 'price_list_id',
-                                $user->price_list_id,
+                                $user
+                                    ->price_list_id,
                             ),
             ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Producto no disponible para este cliente
+            |--------------------------------------------------------------------------
+            |
+            | Si el producto no está actualmente en la lista asignada
+            | al cliente, no debe poder acceder a él manualmente.
+            |
+            */
+
+            $priceItem =
+                $product
+                    ->priceListItems
+                    ->first();
+
+            if (
+                $priceItem ===
+                null
+            ) {
+                return response()->json([
+                    'message' =>
+                        'Producto no disponible.',
+                ], 404);
+            }
         }
 
         $data = [
-            'id' => $product->id,
+            'id' =>
+                $product->id,
 
             'code' =>
                 $product->bcn_code,
@@ -377,8 +549,20 @@ class ProductController extends Controller
             'name' =>
                 $product->name,
 
+            'image_url' =>
+                $product->image_path
+                    ? url(
+                        Storage::disk(
+                            'public',
+                        )->url(
+                            $product->image_path,
+                        ),
+                    )
+                    : null,
+
             'brand' =>
-                $product->brand === null
+                $product->brand ===
+                null
                     ? null
                     : [
                         'id' =>
@@ -393,7 +577,8 @@ class ProductController extends Controller
                     ],
 
             'category' =>
-                $product->category === null
+                $product->category ===
+                null
                     ? null
                     : [
                         'id' =>
@@ -407,34 +592,43 @@ class ProductController extends Controller
                                 ->name,
                     ],
 
-            'can_view_price' => false,
+            'can_view_price' =>
+                false,
         ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Precio del producto
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $user?->isClient() &&
-            $user->price_list_id !== null
+            $user->price_list_id !==
+                null
         ) {
-            $priceItem = $product
-                ->priceListItems
-                ->first();
+            $priceItem =
+                $product
+                    ->priceListItems
+                    ->first();
 
-            if ($priceItem !== null) {
-                $data[
-                    'can_view_price'
-                ] = true;
+            $data[
+                'can_view_price'
+            ] = true;
 
-                $data['price'] =
-                    $priceItem->price;
+            $data['price'] =
+                $priceItem->price;
 
-                $data[
-                    'discount_percentage'
-                ] = $priceItem
+            $data[
+                'discount_percentage'
+            ] =
+                $priceItem
                     ->discount_percentage;
-            }
         }
 
         return response()->json([
-            'data' => $data,
+            'data' =>
+                $data,
         ]);
     }
 }

@@ -14,6 +14,8 @@ class ClientNotification extends Model
         'is_read',
         'expires_at',
         'read_at',
+        'admin_deleted_at',
+        'client_deleted_at',
     ];
 
     protected function casts(): array
@@ -22,6 +24,8 @@ class ClientNotification extends Model
             'is_read' => 'boolean',
             'expires_at' => 'datetime',
             'read_at' => 'datetime',
+            'admin_deleted_at' => 'datetime',
+            'client_deleted_at' => 'datetime',
         ];
     }
 

@@ -3,12 +3,16 @@ import {
   Bell,
   BellRing,
   CheckCheck,
+  Trash2,
+  X,
 } from 'lucide-react'
+
 import {
   useEffect,
   useMemo,
   useState,
 } from 'react'
+
 import { Link } from 'react-router-dom'
 
 import api from '../../services/api'
@@ -39,9 +43,22 @@ function ClientNotifications() {
   const [readingId, setReadingId] =
     useState(null)
 
+  const [deletingId, setDeletingId] =
+    useState(null)
+
   const [
     isMarkingAll,
     setIsMarkingAll,
+  ] = useState(false)
+
+  const [
+    isDeletingAll,
+    setIsDeletingAll,
+  ] = useState(false)
+
+  const [
+    isDeleteAllModalOpen,
+    setIsDeleteAllModalOpen,
   ] = useState(false)
 
   const [errorMessage, setErrorMessage] =
@@ -170,6 +187,88 @@ function ClientNotifications() {
     }
   }
 
+  async function deleteNotification(
+    notificationId,
+  ) {
+    const confirmed = window.confirm(
+      '¿Quieres eliminar esta notificación de tu cuenta?',
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingId(notificationId)
+    setErrorMessage('')
+
+    try {
+      await api.delete(
+        `/api/my/notifications/${notificationId}`,
+      )
+
+      setNotifications((current) =>
+        current.filter(
+          (notification) =>
+            notification.id !==
+            notificationId,
+        ),
+      )
+
+      window.dispatchEvent(
+        new Event(
+          'notifications-updated',
+        ),
+      )
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ??
+          'No pudimos eliminar la notificación.',
+      )
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+
+  async function deleteAllNotifications() {
+    setIsDeletingAll(true)
+    setErrorMessage('')
+
+    try {
+      await api.delete(
+        '/api/my/notifications/all',
+      )
+
+      setNotifications([])
+      setIsDeleteAllModalOpen(false)
+
+      window.dispatchEvent(
+        new Event(
+          'notifications-updated',
+        ),
+      )
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ??
+          'No pudimos eliminar todas las notificaciones.',
+      )
+
+      setIsDeleteAllModalOpen(false)
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    } finally {
+      setIsDeletingAll(false)
+    }
+  }
+
   return (
     <>
       <section className="border-b border-neutral-200 bg-bmg-light">
@@ -233,7 +332,7 @@ function ClientNotifications() {
 
               <p className="mx-auto mt-3 max-w-xl leading-7 text-neutral-600">
                 Cuando BMG envíe una promoción,
-                aviso o novedad, aparecerá aquí.
+                aviso o novedad, aparecerá aquÃ.
               </p>
             </section>
           ) : (
@@ -257,25 +356,53 @@ function ClientNotifications() {
                   </p>
                 </div>
 
-                {unreadCount > 0 && (
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={markAllAsRead}
+                      disabled={
+                        isMarkingAll ||
+                        isDeletingAll
+                      }
+                      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                    >
+                      <CheckCheck
+                        size={16}
+                        aria-hidden="true"
+                      />
+
+                      <span className="text-sm font-bold leading-none">
+                        {isMarkingAll
+                          ? 'Actualizando...'
+                          : 'Marcar todas como leídas'}
+                      </span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
-                    onClick={markAllAsRead}
-                    disabled={isMarkingAll}
-                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                    onClick={() =>
+                      setIsDeleteAllModalOpen(
+                        true,
+                      )
+                    }
+                    disabled={
+                      isDeletingAll ||
+                      isMarkingAll
+                    }
+                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 text-red-600 transition hover:border-red-600 hover:bg-red-50 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   >
-                    <CheckCheck
+                    <Trash2
                       size={16}
                       aria-hidden="true"
                     />
 
                     <span className="text-sm font-bold leading-none">
-                      {isMarkingAll
-                        ? 'Actualizando...'
-                        : 'Marcar todas como leídas'}
+                      Eliminar todas
                     </span>
                   </button>
-                )}
+                </div>
               </div>
 
               <div className="mt-8 space-y-5">
@@ -283,6 +410,10 @@ function ClientNotifications() {
                   (notification) => {
                     const isUnread =
                       !notification.is_read
+
+                    const isDeleting =
+                      deletingId ===
+                      notification.id
 
                     return (
                       <article
@@ -318,7 +449,9 @@ function ClientNotifications() {
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <h3 className="text-xl font-bold text-bmg-dark">
-                                  {notification.title}
+                                  {
+                                    notification.title
+                                  }
                                 </h3>
 
                                 {isUnread && (
@@ -357,34 +490,66 @@ function ClientNotifications() {
                             </div>
                           </div>
 
-                          {isUnread && (
+                          <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+                            {isUnread && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  markAsRead(
+                                    notification.id,
+                                  )
+                                }
+                                disabled={
+                                  readingId ===
+                                    notification.id ||
+                                  isMarkingAll ||
+                                  isDeletingAll ||
+                                  isDeleting
+                                }
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                              >
+                                <CheckCheck
+                                  size={16}
+                                  aria-hidden="true"
+                                />
+
+                                <span className="text-sm font-bold leading-none">
+                                  {readingId ===
+                                  notification.id
+                                    ? 'Actualizando...'
+                                    : 'Marcar como leída'}
+                                </span>
+                              </button>
+                            )}
+
                             <button
                               type="button"
                               onClick={() =>
-                                markAsRead(
+                                deleteNotification(
                                   notification.id,
                                 )
                               }
                               disabled={
+                                isDeleting ||
+                                isDeletingAll ||
+                                isMarkingAll ||
                                 readingId ===
-                                  notification.id ||
-                                isMarkingAll
+                                  notification.id
                               }
-                              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 text-red-600 transition hover:border-red-600 hover:bg-red-50 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                             >
-                              <CheckCheck
+                              <Trash2
                                 size={16}
                                 aria-hidden="true"
                               />
 
                               <span className="text-sm font-bold leading-none">
-                                {readingId ===
-                                notification.id
-                                  ? 'Actualizando...'
-                                  : 'Marcar como leída'}
+                                {isDeleting
+                                  ? 'Eliminando...'
+                                  : 'Eliminar'}
                               </span>
                             </button>
-                          )}
+                          </div>
                         </div>
                       </article>
                     )
@@ -395,6 +560,90 @@ function ClientNotifications() {
           )}
         </div>
       </main>
+
+      {isDeleteAllModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-all-client-title"
+            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-semibold text-red-600">
+                  Confirmar eliminación
+                </p>
+
+                <h2
+                  id="delete-all-client-title"
+                  className="mt-1 text-2xl font-bold text-bmg-dark"
+                >
+                  ¿Eliminar todas tus notificaciones?
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setIsDeleteAllModalOpen(
+                    false,
+                  )
+                }
+                disabled={isDeletingAll}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition hover:border-bmg-blue hover:text-bmg-blue disabled:opacity-50"
+                aria-label="Cerrar"
+              >
+                <X
+                  size={20}
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+
+            <p className="mt-5 leading-7 text-neutral-600">
+              Se eliminarán todas las notificaciones de tu cuenta.
+            </p>
+
+            <p className="mt-3 leading-7 text-neutral-600">
+              Esta acción no se puede deshacer desde tu cuenta.
+            </p>
+
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() =>
+                  setIsDeleteAllModalOpen(
+                    false,
+                  )
+                }
+                disabled={isDeletingAll}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-bmg-dark bg-white px-4 py-2 text-sm font-bold leading-5 text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  deleteAllNotifications
+                }
+                disabled={isDeletingAll}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-bold leading-5 text-white transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60"
+              >
+                <Trash2
+                  size={17}
+                  aria-hidden="true"
+                />
+
+                {isDeletingAll
+                  ? 'Eliminando...'
+                  : 'Eliminar todas'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

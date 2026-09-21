@@ -19,6 +19,7 @@ class QuoteController extends Controller
         'answered',
         'approved',
         'rejected',
+        'processed',
     ];
 
     /**
@@ -432,6 +433,11 @@ class QuoteController extends Controller
                         ? $subtotal
                         : 0,
 
+                'final_total' =>
+                    $hasVisiblePrices
+                        ? $subtotal
+                        : 0,
+
                 'status' =>
                     'pending',
             ]);
@@ -655,8 +661,7 @@ class QuoteController extends Controller
                 ),
         ]);
     }
-
-    /**
+        /**
      * Listado administrativo de todas las cotizaciones.
      */
     public function index(
@@ -681,9 +686,253 @@ class QuoteController extends Controller
             ->latest()
             ->paginate(20);
 
+        $quotes
+            ->getCollection()
+            ->transform(
+                function (
+                    Quote $quote,
+                ): array {
+                    return array_merge(
+                        $this->formatStoredQuote(
+                            $quote,
+                        ),
+                        [
+                            'user' =>
+                                $quote->user === null
+                                    ? null
+                                    : [
+                                        'id' =>
+                                            $quote
+                                                ->user
+                                                ->id,
+
+                                        'name' =>
+                                            $quote
+                                                ->user
+                                                ->name,
+
+                                        'email' =>
+                                            $quote
+                                                ->user
+                                                ->email,
+                                    ],
+                        ],
+                    );
+                },
+            );
+
         return response()->json(
             $quotes,
         );
+    }
+
+    /**
+     * Devuelve el detalle de una cotización
+     * para administración.
+     */
+    public function show(
+        Request $request,
+        int $quote,
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user?->isAdmin()) {
+            return response()->json(
+                [
+                    'message' =>
+                        'No tienes permisos para consultar esta cotización.',
+                ],
+                403,
+            );
+        }
+
+        $adminQuote = Quote::query()
+            ->with([
+                'user:id,name,email',
+            ])
+            ->find($quote);
+
+        if ($adminQuote === null) {
+            return response()->json(
+                [
+                    'message' =>
+                        'La cotización solicitada no existe.',
+                ],
+                404,
+            );
+        }
+
+        return response()->json([
+            'data' => array_merge(
+                $this->formatStoredQuote(
+                    $adminQuote,
+                ),
+                [
+                    'user' =>
+                        $adminQuote->user === null
+                            ? null
+                            : [
+                                'id' =>
+                                    $adminQuote
+                                        ->user
+                                        ->id,
+
+                                'name' =>
+                                    $adminQuote
+                                        ->user
+                                        ->name,
+
+                                'email' =>
+                                    $adminQuote
+                                        ->user
+                                        ->email,
+                            ],
+                ],
+            ),
+        ]);
+    }
+
+    /**
+     * Actualiza el estado de una cotización.
+     */
+    public function updateStatus(
+        Request $request,
+        int $quote,
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user?->isAdmin()) {
+            return response()->json(
+                [
+                    'message' =>
+                        'No tienes permisos para actualizar cotizaciones.',
+                ],
+                403,
+            );
+        }
+
+        $validated =
+            $request->validate([
+                'status' => [
+                    'required',
+                    'string',
+                    Rule::in(
+                        self::QUOTE_STATUSES,
+                    ),
+                ],
+            ]);
+
+        $adminQuote =
+            Quote::query()
+                ->find($quote);
+
+        if (
+            $adminQuote === null
+        ) {
+            return response()->json(
+                [
+                    'message' =>
+                        'La cotización solicitada no existe.',
+                ],
+                404,
+            );
+        }
+
+        $adminQuote->status =
+            $validated['status'];
+
+        $adminQuote->save();
+
+        return response()->json([
+            'message' =>
+                'Estado de la cotización actualizado correctamente.',
+
+            'data' =>
+                $this->formatStoredQuote(
+                    $adminQuote,
+                ),
+        ]);
+    }
+
+    /**
+     * Actualiza el total final de una cotización.
+     */
+    public function updateFinalTotal(
+        Request $request,
+        int $quote,
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user?->isAdmin()) {
+            return response()->json(
+                [
+                    'message' =>
+                        'No tienes permisos para modificar el total final de la cotización.',
+                ],
+                403,
+            );
+        }
+
+        $validated =
+            $request->validate(
+                [
+                    'final_total' => [
+                        'required',
+                        'numeric',
+                        'min:0',
+                        'max:9999999999.99',
+                    ],
+                ],
+                [
+                    'final_total.required' =>
+                        'El total final es obligatorio.',
+
+                    'final_total.numeric' =>
+                        'El total final debe ser un importe válido.',
+
+                    'final_total.min' =>
+                        'El total final no puede ser negativo.',
+
+                    'final_total.max' =>
+                        'El total final supera el importe permitido.',
+                ],
+            );
+
+        $adminQuote =
+            Quote::query()
+                ->find($quote);
+
+        if (
+            $adminQuote === null
+        ) {
+            return response()->json(
+                [
+                    'message' =>
+                        'La cotización solicitada no existe.',
+                ],
+                404,
+            );
+        }
+
+        $adminQuote->final_total =
+            round(
+                (float) $validated[
+                    'final_total'
+                ],
+                2,
+            );
+
+        $adminQuote->save();
+
+        return response()->json([
+            'message' =>
+                'Total final actualizado correctamente.',
+
+            'data' =>
+                $this->formatStoredQuote(
+                    $adminQuote,
+                ),
+        ]);
     }
 
     /**
@@ -805,6 +1054,14 @@ class QuoteController extends Controller
             'subtotal' =>
                 $hasVisiblePrices
                     ? $quote->subtotal
+                    : null,
+
+            'final_total' =>
+                $hasVisiblePrices
+                    ? (
+                        $quote->final_total ??
+                        $quote->subtotal
+                    )
                     : null,
 
             'has_visible_prices' =>
