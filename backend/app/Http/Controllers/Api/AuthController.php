@@ -730,10 +730,7 @@ class AuthController extends Controller
         string $status
     ): string {
         $frontendUrl = rtrim(
-            (string) env(
-                'FRONTEND_URL',
-                'http://localhost:5173'
-            ),
+            (string) config('app.frontend_url', 'http://localhost:5173'),
             '/'
         );
 
