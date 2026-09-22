@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,6 +74,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(
             Quote::class
+        );
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(
+            new VerifyEmailNotification()
         );
     }
 
