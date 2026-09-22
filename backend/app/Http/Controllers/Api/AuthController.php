@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PriceList;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -243,12 +246,6 @@ class AuthController extends Controller
             }
         );
 
-        /*
-         * Envía el correo de verificación.
-         *
-         * Mientras MAIL_MAILER=log, Laravel escribirá
-         * el correo en storage/logs/laravel.log.
-         */
         $user->sendEmailVerificationNotification();
 
         $token = $user
@@ -344,6 +341,152 @@ class AuthController extends Controller
                 'token' =>
                     $token,
             ],
+        ]);
+    }
+
+    public function forgotPassword(
+        Request $request
+    ): JsonResponse {
+        $validated = $request->validate(
+            [
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                ],
+            ],
+            [
+                'email.required' =>
+                    'El correo electrónico es obligatorio.',
+
+                'email.email' =>
+                    'Ingresa un correo electrónico válido.',
+            ]
+        );
+
+        $email = strtolower(
+            trim($validated['email'])
+        );
+
+        /*
+         * No revelamos si el correo existe o no.
+         *
+         * Esto evita que este endpoint pueda utilizarse
+         * para enumerar las cuentas registradas.
+         */
+        Password::broker()->sendResetLink([
+            'email' => $email,
+        ]);
+
+        return response()->json([
+            'message' =>
+                'Si existe una cuenta asociada a ese correo electrónico, te enviaremos un enlace para restablecer tu contraseña.',
+        ]);
+    }
+
+    public function resetPassword(
+        Request $request
+    ): JsonResponse {
+        $validated = $request->validate(
+            [
+                'token' => [
+                    'required',
+                    'string',
+                ],
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                ],
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                ],
+                'password_confirmation' => [
+                    'required',
+                    'string',
+                    'min:8',
+                ],
+            ],
+            [
+                'token.required' =>
+                    'El token de recuperación es obligatorio.',
+
+                'email.required' =>
+                    'El correo electrónico es obligatorio.',
+
+                'email.email' =>
+                    'Ingresa un correo electrónico válido.',
+
+                'password.required' =>
+                    'La nueva contraseña es obligatoria.',
+
+                'password.min' =>
+                    'La contraseña debe tener al menos 8 caracteres.',
+
+                'password.confirmed' =>
+                    'Las contraseñas no coinciden.',
+
+                'password_confirmation.required' =>
+                    'Debes confirmar la nueva contraseña.',
+
+                'password_confirmation.min' =>
+                    'La confirmación debe tener al menos 8 caracteres.',
+            ]
+        );
+
+        $credentials = [
+            'email' => strtolower(
+                trim($validated['email'])
+            ),
+            'password' =>
+                $validated['password'],
+            'password_confirmation' =>
+                $validated['password_confirmation'],
+            'token' =>
+                $validated['token'],
+        ];
+
+        $status = Password::broker()->reset(
+            $credentials,
+            function (
+                User $user,
+                string $password
+            ): void {
+                $user->forceFill([
+                    'password' =>
+                        Hash::make($password),
+
+                    'remember_token' =>
+                        Str::random(60),
+                ])->save();
+
+                /*
+                 * Cerramos los tokens Sanctum existentes.
+                 * Si alguien tenía una sesión abierta antes
+                 * del cambio de contraseña, deja de ser válida.
+                 */
+                $user->tokens()->delete();
+
+                event(
+                    new PasswordReset($user)
+                );
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => [
+                    'El enlace para restablecer la contraseña es inválido o ha expirado.',
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'message' =>
+                'Tu contraseña se restableció correctamente. Ya podés iniciar sesión con tu nueva contraseña.',
         ]);
     }
 

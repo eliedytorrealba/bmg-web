@@ -22,6 +22,7 @@ import Brands from './pages/Brands/Brands'
 import Cart from './pages/Cart/Cart'
 import Contact from './pages/Contact/Contact'
 import EmailVerification from './pages/EmailVerification/EmailVerification'
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword'
 import Home from './pages/Home/Home'
 import Login from './pages/Login/Login'
 import ProductDetail from './pages/Products/ProductDetail'
@@ -36,6 +37,7 @@ import ClientQuoteDetail from './pages/Profile/ClientQuoteDetail'
 import ClientQuotes from './pages/Profile/ClientQuotes'
 import QuoteRequest from './pages/Quotes/QuoteRequest'
 import Register from './pages/Register/Register'
+import ResetPassword from './pages/ResetPassword/ResetPassword'
 
 import ProtectedRoute from './routes/ProtectedRoute'
 
@@ -85,6 +87,16 @@ function App() {
           <Route
             path="/login"
             element={<Login />}
+          />
+
+          <Route
+            path="/olvide-mi-contrasena"
+            element={<ForgotPassword />}
+          />
+
+          <Route
+            path="/restablecer-contrasena"
+            element={<ResetPassword />}
           />
 
           <Route

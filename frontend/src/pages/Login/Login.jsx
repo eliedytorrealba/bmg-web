@@ -267,7 +267,16 @@ function Login() {
             </span>
           </label>
 
-          <label className="mt-5 flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-600">
+          <div className="mt-3 text-right">
+            <Link
+              to="/olvide-mi-contrasena"
+              className="inline-flex min-h-11 items-center text-sm font-bold text-bmg-blue transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+
+          <label className="mt-2 flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-600">
             <input
               type="checkbox"
               name="remember"

@@ -37,6 +37,16 @@ Route::middleware('guest')->group(function (): void {
         '/login',
         [AuthController::class, 'login'],
     );
+
+    Route::post(
+        '/forgot-password',
+        [AuthController::class, 'forgotPassword'],
+    )->middleware('throttle:6,1');
+
+    Route::post(
+        '/reset-password',
+        [AuthController::class, 'resetPassword'],
+    )->middleware('throttle:6,1');
 });
 
 /*
