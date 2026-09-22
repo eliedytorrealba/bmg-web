@@ -28,27 +28,12 @@ class VerifyEmailNotification extends Notification
             ->subject(
                 'Verificá tu correo | BMG Distribuidora'
             )
-            ->greeting(
-                '¡Hola, ' . $notifiable->name . '!'
-            )
-            ->line(
-                'Gracias por registrarte en BMG Distribuidora.'
-            )
-            ->line(
-                'Para completar el alta de tu cuenta, necesitamos verificar tu dirección de correo electrónico.'
-            )
-            ->action(
-                'Verificar mi correo',
-                $verificationUrl
-            )
-            ->line(
-                'Este enlace de verificación tiene una duración limitada por seguridad.'
-            )
-            ->line(
-                'Si vos no creaste esta cuenta, podés ignorar este mensaje.'
-            )
-            ->salutation(
-                "Saludos,\nBMG Distribuidora"
+            ->view(
+                'emails.verify-email',
+                [
+                    'user' => $notifiable,
+                    'verificationUrl' => $verificationUrl,
+                ]
             );
     }
 
