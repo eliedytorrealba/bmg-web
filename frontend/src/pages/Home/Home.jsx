@@ -28,7 +28,7 @@ import shellLogo from '../../assets/brands/shell.svg'
 import totalEnergiesLogo from '../../assets/brands/totalenergies.svg'
 import walkerLogo from '../../assets/brands/walker.png'
 
-import homeHero from '../../assets/home/home-hero.jpeg'
+import homeHero from '../../assets/home/home-hero.png'
 import homeDeposito from '../../assets/home/home-deposito.jpeg'
 
 import categoryFiltros from '../../assets/categories/category-filtros.png'
