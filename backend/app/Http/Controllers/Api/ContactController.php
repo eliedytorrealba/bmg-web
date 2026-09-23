@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactMessageMail;
 use App\Models\ContactMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class ContactController extends Controller
 {
@@ -124,6 +127,26 @@ class ContactController extends Controller
 
                 'status' => 'pending',
             ]);
+
+        try {
+            Mail::to(
+                'contacto@distribuidorabmg.com',
+            )->send(
+                new ContactMessageMail(
+                    $contactMessage,
+                ),
+            );
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json(
+                [
+                    'message' =>
+                        'Recibimos tu consulta, pero no pudimos notificar al equipo comercial. Inténtalo nuevamente más tarde.',
+                ],
+                500,
+            );
+        }
 
         return response()->json(
             [
