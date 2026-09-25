@@ -382,11 +382,11 @@ function Brands() {
           </div>
 
           {filteredBrands.length > 0 ? (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {filteredBrands.map((brand) => (
                 <article
                   key={brand.id}
-                  className="group min-w-0 overflow-hidden rounded-3xl border border-white/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-bmg-blue hover:shadow-2xl"
+                  className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-bmg-blue hover:shadow-xl"
                 >
                   <Link
                     to={getBrandProductsPath(
@@ -396,7 +396,7 @@ function Brands() {
                       brand.displayName ??
                       brand.name
                     }`}
-                    className="flex min-h-48 items-center justify-center px-8 py-8 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-bmg-blue"
+                    className="flex min-h-32 items-center justify-center px-4 py-5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-bmg-blue"
                   >
                     <img
                       src={brand.logo}
@@ -405,17 +405,17 @@ function Brands() {
                         brand.name
                       }`}
                       loading="lazy"
-                      className={`${brand.imageClassName} h-auto w-auto object-contain transition duration-300 group-hover:scale-105`}
+                      className={`${brand.imageClassName} max-h-16 max-w-[130px] h-auto w-auto object-contain transition duration-300 group-hover:scale-105`}
                     />
                   </Link>
 
-                  <div className="border-t border-neutral-200 bg-neutral-50 px-6 py-5">
-                    <h3 className="break-words text-lg font-bold text-bmg-dark">
+                  <div className="border-t border-neutral-200 bg-neutral-50 px-4 py-4">
+                    <h3 className="break-words text-base font-bold text-bmg-dark">
                       {brand.displayName ??
                         brand.name}
                     </h3>
 
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-neutral-600">
+                    <p className="mt-2 min-h-[60px] text-xs leading-5 text-neutral-600">
                       {brand.description}
                     </p>
 
@@ -423,7 +423,7 @@ function Brands() {
                       to={getBrandProductsPath(
                         brand.name,
                       )}
-                      className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-bmg-dark transition hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                      className="mt-3 inline-flex min-h-9 items-center text-xs font-bold text-bmg-dark transition hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
                     >
                       Ver productos
 
