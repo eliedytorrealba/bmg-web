@@ -341,10 +341,10 @@ function ClientQuotes() {
   return (
     <>
       <section className="border-b border-neutral-200 bg-bmg-light">
-        <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8 lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
           <Link
             to="/mi-cuenta"
-            className="inline-flex min-h-11 items-center gap-2 font-semibold text-bmg-dark transition hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
+            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-bmg-dark transition hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-4"
           >
             <ArrowLeft
               size={20}
@@ -353,15 +353,15 @@ function ClientQuotes() {
             Volver a Mi cuenta
           </Link>
 
-          <p className="mt-8 font-semibold text-bmg-blue">
+          <p className="mt-5 font-semibold text-bmg-blue">
             Área de clientes
           </p>
 
-          <h1 className="mt-3 text-4xl font-bold tracking-tight text-bmg-dark sm:text-5xl">
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-bmg-dark sm:text-4xl">
             Mis cotizaciones
           </h1>
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-600">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-600 sm:text-base">
             Consulta las solicitudes enviadas,
             los productos incluidos y el estado
             de cada cotización.
@@ -370,9 +370,9 @@ function ClientQuotes() {
       </section>
 
       <main className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-          <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-            <div className="flex flex-col gap-4 border-b border-neutral-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
+          <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex flex-col gap-4 border-b border-neutral-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm text-neutral-500">
                   Historial
@@ -401,7 +401,7 @@ function ClientQuotes() {
               </Link>
             </div>
 
-            <section className="mt-7 rounded-3xl border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+            <section className="mt-5 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bmg-blue/10 text-bmg-blue">
                   <Filter
@@ -421,7 +421,7 @@ function ClientQuotes() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-5 md:grid-cols-3">
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
                 <label className="block">
                   <span className="text-sm font-bold text-bmg-dark">
                     Desde
@@ -500,7 +500,7 @@ function ClientQuotes() {
                 </label>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -630,7 +630,7 @@ function ClientQuotes() {
             {!isLoading &&
               !errorMessage &&
               quotes.length > 0 && (
-                <div className="mt-8 space-y-5">
+                <div className="mt-6 space-y-3">
                   {quotes.map((quote) => {
                     const status =
                       quote.status ??
@@ -651,15 +651,30 @@ function ClientQuotes() {
                     return (
                       <article
                         key={quote.id}
-                        className="rounded-3xl border border-neutral-200 bg-white p-5 transition hover:border-bmg-blue hover:shadow-md sm:p-6"
+                        className="rounded-2xl border border-neutral-200 bg-white px-4 py-4 transition hover:border-bmg-blue hover:shadow-md sm:px-5"
                       >
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="grid gap-4 lg:grid-cols-[minmax(180px,0.75fr)_minmax(0,1.7fr)_minmax(150px,0.6fr)_auto] lg:items-center">
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-neutral-500">
-                              Cotización
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                                Cotización
+                              </p>
 
-                            <h3 className="mt-1 break-words text-2xl font-bold text-bmg-dark">
+                              <span
+                                className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${
+                                  statusClasses[
+                                    status
+                                  ] ??
+                                  statusClasses.pending
+                                }`}
+                              >
+                                {statusLabels[
+                                  status
+                                ] ?? 'Pendiente'}
+                              </span>
+                            </div>
+
+                            <h3 className="mt-1 break-words text-lg font-bold text-bmg-dark">
                               {quote.number ??
                                 `#${String(
                                   quote.id,
@@ -669,10 +684,10 @@ function ClientQuotes() {
                                 )}`}
                             </h3>
 
-                            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm text-neutral-600">
-                              <span className="inline-flex items-center gap-2">
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-neutral-600">
+                              <span className="inline-flex items-center gap-1.5">
                                 <CalendarDays
-                                  size={17}
+                                  size={15}
                                   aria-hidden="true"
                                   className="shrink-0 text-bmg-blue"
                                 />
@@ -686,9 +701,9 @@ function ClientQuotes() {
                                   : 'Sin fecha'}
                               </span>
 
-                              <span className="inline-flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1.5">
                                 <Package
-                                  size={17}
+                                  size={15}
                                   aria-hidden="true"
                                   className="shrink-0 text-bmg-blue"
                                 />
@@ -701,103 +716,84 @@ function ClientQuotes() {
                             </div>
                           </div>
 
-                          <span
-                            className={`inline-flex self-start rounded-full border px-3 py-1.5 text-xs font-bold ${
-                              statusClasses[
-                                status
-                              ] ??
-                              statusClasses.pending
-                            }`}
-                          >
-                            {statusLabels[
-                              status
-                            ] ?? 'Pendiente'}
-                          </span>
-                        </div>
+                          <div className="min-w-0 border-t border-neutral-200 pt-3 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                            <p className="text-xs font-bold text-bmg-dark">
+                              Productos incluidos
+                            </p>
 
-                        <div className="mt-6 border-t border-neutral-200 pt-5">
-                          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-bmg-dark">
-                                Productos incluidos
-                              </p>
-
-                              {items.length >
-                              0 ? (
-                                <ul className="mt-3 space-y-2">
+                            {items.length > 0 ? (
+                              <div className="mt-1.5">
+                                <p className="line-clamp-2 text-xs leading-5 text-neutral-600">
                                   {items
                                     .slice(0, 3)
                                     .map(
-                                      (
-                                        item,
-                                        index,
-                                      ) => (
-                                        <li
-                                          key={`${quote.id}-${item.productId ?? index}-${index}`}
-                                          className="break-words text-sm leading-6 text-neutral-600"
-                                        >
-                                          {Number(
-                                            item.quantity,
-                                          ) || 1}{' '}
-                                          ×{' '}
-                                          {item.name ??
-                                            'Producto'}
-                                        </li>
-                                      ),
-                                    )}
-                                </ul>
-                              ) : (
-                                <p className="mt-3 text-sm text-neutral-500">
-                                  No hay productos
-                                  disponibles en esta
-                                  cotización.
+                                      (item) =>
+                                        `${Number(
+                                          item.quantity,
+                                        ) || 1} × ${
+                                          item.name ??
+                                          'Producto'
+                                        }`,
+                                    )
+                                    .join(' · ')}
                                 </p>
-                              )}
 
-                              {items.length >
-                                3 && (
-                                <p className="mt-2 text-sm font-semibold text-bmg-blue">
-                                  +{' '}
-                                  {items.length -
-                                    3}{' '}
-                                  productos más
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="md:text-right">
-                              {quote.has_visible_prices ? (
-                                <>
-                                  <p className="text-sm text-neutral-500">
-                                    {quote.all_prices_visible
-                                      ? 'Subtotal'
-                                      : 'Subtotal parcial'}
+                                {items.length >
+                                  3 && (
+                                  <p className="mt-1 text-xs font-semibold text-bmg-blue">
+                                    +{' '}
+                                    {items.length -
+                                      3}{' '}
+                                    productos más
                                   </p>
-
-                                  <p className="mt-1 text-2xl font-bold text-bmg-dark">
-                                    {currencyFormatter.format(
-                                      Number(
-                                        quote.subtotal,
-                                      ) || 0,
-                                    )}
-                                  </p>
-                                </>
-                              ) : (
-                                <p className="font-bold text-bmg-blue">
-                                  Precio a confirmar
-                                </p>
-                              )}
-                            </div>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="mt-1.5 text-xs text-neutral-500">
+                                No hay productos disponibles
+                                en esta cotización.
+                              </p>
+                            )}
                           </div>
-                        </div>
 
-                        <div className="mt-6 flex justify-end border-t border-neutral-200 pt-5">
-                          <Link
-                            to={`/mi-cuenta/cotizaciones/${quote.id}`}
-                            className="inline-flex min-h-11 items-center justify-center rounded-full border border-bmg-dark px-5 py-2.5 text-sm font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
-                          >
-                            Ver detalle
-                          </Link>
+                          <div className="border-t border-neutral-200 pt-3 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                            {quote.has_visible_prices ? (
+                              <>
+                                <p className="text-xs text-neutral-500">
+                                  {quote.all_prices_visible
+                                    ? 'Subtotal'
+                                    : 'Subtotal parcial'}
+                                </p>
+
+                                <p className="mt-1 text-lg font-bold text-bmg-dark">
+                                  {currencyFormatter.format(
+                                    Number(
+                                      quote.subtotal,
+                                    ) || 0,
+                                  )}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-xs text-neutral-500">
+                                  Precio
+                                </p>
+
+                                <p className="mt-1 text-sm font-bold text-bmg-blue">
+                                  A confirmar
+                                </p>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="border-t border-neutral-200 pt-3 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                            <Link
+                              to={`/mi-cuenta/cotizaciones/${quote.id}`}
+                              className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-bmg-dark px-4 py-2 text-xs font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 lg:w-auto"
+                            >
+                              Ver detalle
+                            </Link>
+                          </div>
                         </div>
                       </article>
                     )

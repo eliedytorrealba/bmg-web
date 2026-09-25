@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\PriceList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -101,10 +102,17 @@ class ProductController extends Controller
                 'sanctum',
             )->user();
 
+        $generalPriceListId =
+            PriceList::query()
+                ->where('is_general', true)
+                ->where('is_active', true)
+                ->value('id');
+
         $priceListId =
-            $user?->isClient()
+            $user?->isClient() &&
+            $user->price_list_id !== null
                 ? $user->price_list_id
-                : null;
+                : $generalPriceListId;
 
         $products =
             Product::query()
@@ -145,6 +153,10 @@ class ProductController extends Controller
                             },
                         );
                     },
+                    fn (
+                        Builder $query,
+                    ) =>
+                        $query->whereRaw('1 = 0'),
                 )
 
                 /*
@@ -477,66 +489,69 @@ class ProductController extends Controller
                 'sanctum',
             )->user();
 
-        $product->load([
-            'brand:id,name',
-            'category:id,name',
-        ]);
+        $generalPriceListId =
+            PriceList::query()
+                ->where('is_general', true)
+                ->where('is_active', true)
+                ->value('id');
+
+        $priceListId =
+            $user?->isClient() &&
+            $user->price_list_id !== null
+                ? $user->price_list_id
+                : $generalPriceListId;
 
         /*
         |--------------------------------------------------------------------------
-        | Cargar precio correspondiente a la lista
+        | Disponibilidad del producto según la lista efectiva
         |--------------------------------------------------------------------------
+        |
+        | Cliente con lista asignada: usa su lista.
+        | Administrador o visitante: usa la Lista General activa.
+        |
+        | Si no existe una lista efectiva o el producto no pertenece
+        | actualmente a ella, no debe poder abrirse desde el catálogo.
+        |
         */
 
-        if (
-            $user?->isClient() &&
-            $user->price_list_id !==
-                null
-        ) {
-            $product->load([
-                'priceListItems' =>
-                    fn (
-                        $query,
-                    ) =>
-                        $query
-                            ->select([
-                                'id',
-                                'price_list_id',
-                                'product_id',
-                                'price',
-                                'discount_percentage',
-                            ])
-                            ->where(
-                                'price_list_id',
-                                $user
-                                    ->price_list_id,
-                            ),
-            ]);
+        if ($priceListId === null) {
+            return response()->json([
+                'message' =>
+                    'Producto no disponible.',
+            ], 404);
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Producto no disponible para este cliente
-            |--------------------------------------------------------------------------
-            |
-            | Si el producto no está actualmente en la lista asignada
-            | al cliente, no debe poder acceder a él manualmente.
-            |
-            */
+        $product->load([
+            'brand:id,name',
+            'category:id,name',
+            'priceListItems' =>
+                fn (
+                    $query,
+                ) =>
+                    $query
+                        ->select([
+                            'id',
+                            'price_list_id',
+                            'product_id',
+                            'price',
+                            'discount_percentage',
+                        ])
+                        ->where(
+                            'price_list_id',
+                            $priceListId,
+                        ),
+        ]);
 
-            $priceItem =
-                $product
-                    ->priceListItems
-                    ->first();
+        $priceItem =
+            $product
+                ->priceListItems
+                ->first();
 
-            if (
-                $priceItem ===
-                null
-            ) {
-                return response()->json([
-                    'message' =>
-                        'Producto no disponible.',
-                ], 404);
-            }
+        if ($priceItem === null) {
+            return response()->json([
+                'message' =>
+                    'Producto no disponible.',
+            ], 404);
         }
 
         $data = [
@@ -607,11 +622,6 @@ class ProductController extends Controller
             $user->price_list_id !==
                 null
         ) {
-            $priceItem =
-                $product
-                    ->priceListItems
-                    ->first();
-
             $data[
                 'can_view_price'
             ] = true;
@@ -631,4 +641,5 @@ class ProductController extends Controller
                 $data,
         ]);
     }
+
 }

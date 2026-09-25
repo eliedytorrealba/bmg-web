@@ -628,7 +628,7 @@ function About() {
 
           <p>
             Email:{' '}
-            Lubricantesbmg@gmail.com
+            contacto@distribuidorabmg.com
           </p>
         </div>
       </div>

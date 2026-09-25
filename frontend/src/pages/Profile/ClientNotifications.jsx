@@ -332,7 +332,7 @@ function ClientNotifications() {
 
               <p className="mx-auto mt-3 max-w-xl leading-7 text-neutral-600">
                 Cuando BMG envíe una promoción,
-                aviso o novedad, aparecerá aquÃ.
+                aviso o novedad, aparecerá aquí.
               </p>
             </section>
           ) : (

@@ -52,34 +52,39 @@ class QuoteController extends Controller
             );
         }
 
+        $accountErrors = [];
+
+        if (trim((string) $user->name) === '') {
+            $accountErrors['name'][] =
+                'Completa tu nombre en Mi cuenta antes de solicitar una cotización.';
+        }
+
+        if (trim((string) $user->email) === '') {
+            $accountErrors['email'][] =
+                'Completa tu correo electrónico en Mi cuenta antes de solicitar una cotización.';
+        }
+
+        if (trim((string) $user->phone) === '') {
+            $accountErrors['phone'][] =
+                'Completa tu teléfono en Mi cuenta antes de solicitar una cotización.';
+        }
+
+        if ($accountErrors !== []) {
+            return response()->json(
+                [
+                    'message' =>
+                        'Completa los datos de tu cuenta antes de solicitar una cotización.',
+
+                    'errors' =>
+                        $accountErrors,
+                ],
+                422,
+            );
+        }
+
         $validator = Validator::make(
             $request->all(),
             [
-                'customer.name' => [
-                    'required',
-                    'string',
-                    'max:150',
-                ],
-
-                'customer.company' => [
-                    'nullable',
-                    'string',
-                    'max:150',
-                ],
-
-                'customer.email' => [
-                    'required',
-                    'email',
-                    'max:150',
-                ],
-
-                'customer.phone' => [
-                    'required',
-                    'string',
-                    'max:20',
-                    'regex:/^[0-9+\-\s()]+$/',
-                ],
-
                 'message' => [
                     'nullable',
                     'string',
@@ -105,33 +110,6 @@ class QuoteController extends Controller
                 ],
             ],
             [
-                'customer.name.required' =>
-                    'El nombre es obligatorio.',
-
-                'customer.name.max' =>
-                    'El nombre no puede superar los 150 caracteres.',
-
-                'customer.company.max' =>
-                    'La empresa no puede superar los 150 caracteres.',
-
-                'customer.email.required' =>
-                    'El correo electrónico es obligatorio.',
-
-                'customer.email.email' =>
-                    'Ingresa un correo electrónico válido.',
-
-                'customer.email.max' =>
-                    'El correo electrónico no puede superar los 150 caracteres.',
-
-                'customer.phone.required' =>
-                    'El teléfono es obligatorio.',
-
-                'customer.phone.max' =>
-                    'El teléfono no puede superar los 20 caracteres.',
-
-                'customer.phone.regex' =>
-                    'El teléfono contiene caracteres no permitidos.',
-
                 'message.max' =>
                     'El mensaje no puede superar los 1000 caracteres.',
 
@@ -375,38 +353,18 @@ class QuoteController extends Controller
                     $user->id,
 
                 'customer_name' =>
-                    trim(
-                        $validated[
-                            'customer'
-                        ]['name'],
-                    ),
+                    trim((string) $user->name),
 
                 'company' =>
-                    ! empty(
-                        $validated[
-                            'customer'
-                        ]['company']
-                    )
-                        ? trim(
-                            $validated[
-                                'customer'
-                            ]['company'],
-                        )
+                    trim((string) $user->company) !== ''
+                        ? trim((string) $user->company)
                         : null,
 
                 'email' =>
-                    trim(
-                        $validated[
-                            'customer'
-                        ]['email'],
-                    ),
+                    trim((string) $user->email),
 
                 'phone' =>
-                    trim(
-                        $validated[
-                            'customer'
-                        ]['phone'],
-                    ),
+                    trim((string) $user->phone),
 
                 'message' =>
                     ! empty(

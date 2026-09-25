@@ -521,7 +521,7 @@ function AdminQuoteDetail() {
               aria-hidden="true"
             />
 
-            Volver a cotizaciones
+            Volver a Cotizaciones
           </Link>
 
           <div className="mt-6 rounded-3xl border border-red-200 bg-red-50 px-6 py-12 text-center text-red-700">
@@ -547,7 +547,7 @@ function AdminQuoteDetail() {
             aria-hidden="true"
           />
 
-          Volver a cotizaciones
+          Volver a Cotizaciones
         </Link>
 
         <section className="mt-6 overflow-visible rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">

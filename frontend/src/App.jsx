@@ -39,6 +39,7 @@ import QuoteRequest from './pages/Quotes/QuoteRequest'
 import Register from './pages/Register/Register'
 import ResetPassword from './pages/ResetPassword/ResetPassword'
 
+import NonAdminRoute from './routes/NonAdminRoute'
 import ProtectedRoute from './routes/ProtectedRoute'
 
 function App() {
@@ -70,7 +71,11 @@ function App() {
 
           <Route
             path="/contacto"
-            element={<Contact />}
+            element={
+              <NonAdminRoute>
+                <Contact />
+              </NonAdminRoute>
+            }
           />
 
           <Route

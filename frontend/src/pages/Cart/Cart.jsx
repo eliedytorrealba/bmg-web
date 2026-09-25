@@ -1,5 +1,8 @@
 import {
   ArrowLeft,
+  CirclePlus,
+  FileText,
+  Layers3,
   Minus,
   Package,
   Plus,
@@ -78,7 +81,7 @@ function Cart() {
   return (
     <>
       <section className="border-b border-neutral-200 bg-bmg-light">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-14">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
           <Link
             to="/productos"
             className="inline-flex items-center gap-2 text-sm font-bold text-neutral-600 transition hover:text-bmg-blue"
@@ -91,17 +94,17 @@ function Cart() {
             Continuar comprando
           </Link>
 
-          <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="font-semibold text-bmg-blue">
                 Tu selección
               </p>
 
-              <h1 className="mt-2 text-4xl font-bold tracking-tight text-bmg-dark sm:text-5xl">
+              <h1 className="mt-1 text-3xl font-bold tracking-tight text-bmg-dark sm:text-4xl">
                 Carrito
               </h1>
 
-              <p className="mt-4 text-neutral-600">
+              <p className="mt-2 text-sm text-neutral-600">
                 {totalItems}{' '}
                 {totalItems === 1
                   ? 'unidad agregada'
@@ -126,10 +129,10 @@ function Cart() {
       </section>
 
       <main className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-          <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
-            <section aria-label="Productos del carrito">
-              <div className="space-y-5">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
+          <div className="flex flex-col gap-7">
+            <section aria-label="Productos del carrito" className="order-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 {cartItems.map((item) => {
                   const canViewPrice =
                     item.can_view_price === true
@@ -145,12 +148,12 @@ function Cart() {
                   return (
                     <article
                       key={item.id}
-                      className="grid gap-5 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:grid-cols-[150px_1fr] sm:p-6"
+                      className="flex min-w-0 flex-col rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm"
                     >
                       <Link
                         to={`/productos/${item.id}`}
                         aria-label={`Ver ${item.name}`}
-                        className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 p-5"
+                        className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-neutral-100 p-3"
                       >
                         {item.image_url || item.image ? (
                           <img
@@ -172,8 +175,8 @@ function Cart() {
                         )}
                       </Link>
 
-                      <div className="flex min-w-0 flex-col">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+                      <div className="mt-3 flex min-w-0 flex-1 flex-col">
+                        <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="text-sm font-bold text-bmg-blue">
                               {item.brand ??
@@ -182,19 +185,19 @@ function Cart() {
 
                             <Link
                               to={`/productos/${item.id}`}
-                              className="mt-1 block text-xl font-bold text-bmg-dark transition hover:text-bmg-blue"
+                              className="mt-1 block line-clamp-2 text-sm font-bold leading-5 text-bmg-dark transition hover:text-bmg-blue"
                             >
                               {item.name}
                             </Link>
 
-                            <p className="mt-2 text-sm text-neutral-500">
+                            <p className="mt-1 text-xs text-neutral-500">
                               Código:{' '}
                               {item.code ??
                                 'Sin código'}
                             </p>
 
                             {item.presentation && (
-                              <p className="mt-1 text-sm text-neutral-500">
+                              <p className="mt-1 text-xs text-neutral-500">
                                 Presentación:{' '}
                                 {item.presentation}
                               </p>
@@ -207,7 +210,7 @@ function Cart() {
                               removeFromCart(item.id)
                             }
                             aria-label={`Eliminar ${item.name}`}
-                            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition hover:border-red-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition hover:border-red-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                           >
                             <Trash2
                               size={18}
@@ -216,13 +219,13 @@ function Cart() {
                           </button>
                         </div>
 
-                        <div className="mt-6 flex flex-col gap-5 border-t border-neutral-200 pt-5 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="mt-auto flex flex-col gap-3 border-t border-neutral-200 pt-3">
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                               Cantidad
                             </p>
 
-                            <div className="mt-2 inline-flex items-center rounded-full border border-neutral-300 bg-white p-1">
+                            <div className="mt-1 inline-flex items-center rounded-full border border-neutral-300 bg-white p-0.5">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -235,7 +238,7 @@ function Cart() {
                                   item.quantity <= 1
                                 }
                                 aria-label={`Reducir cantidad de ${item.name}`}
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-bmg-dark transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="flex h-7 w-7 items-center justify-center rounded-full text-bmg-dark transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 <Minus
                                   size={17}
@@ -243,7 +246,7 @@ function Cart() {
                                 />
                               </button>
 
-                              <span className="min-w-10 text-center text-sm font-bold text-bmg-dark">
+                              <span className="min-w-8 text-center text-xs font-bold text-bmg-dark">
                                 {item.quantity}
                               </span>
 
@@ -256,7 +259,7 @@ function Cart() {
                                   )
                                 }
                                 aria-label={`Aumentar cantidad de ${item.name}`}
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-bmg-dark transition hover:bg-neutral-100"
+                                className="flex h-7 w-7 items-center justify-center rounded-full text-bmg-dark transition hover:bg-neutral-100"
                               >
                                 <Plus
                                   size={17}
@@ -266,17 +269,17 @@ function Cart() {
                             </div>
                           </div>
 
-                          <div className="sm:text-right">
+                          <div className="text-left">
                             {canViewPrice ? (
                               <>
-                                <p className="text-sm text-neutral-500">
+                                <p className="text-xs text-neutral-500">
                                   {currencyFormatter.format(
                                     itemPrice,
                                   )}{' '}
                                   por unidad
                                 </p>
 
-                                <p className="mt-1 text-2xl font-bold text-bmg-dark">
+                                <p className="mt-0.5 text-lg font-bold text-bmg-dark">
                                   {currencyFormatter.format(
                                     itemTotal,
                                   )}
@@ -284,11 +287,11 @@ function Cart() {
                               </>
                             ) : (
                               <div>
-                                <p className="text-lg font-bold text-bmg-blue">
+                                <p className="text-sm font-bold text-bmg-blue">
                                   Precio a cotizar
                                 </p>
 
-                                <p className="mt-1 max-w-xs text-sm leading-6 text-neutral-500">
+                                <p className="mt-1 text-xs leading-5 text-neutral-500">
                                   Nuestro equipo informará
                                   el valor al responder la
                                   solicitud.
@@ -304,80 +307,146 @@ function Cart() {
               </div>
             </section>
 
-            <aside aria-label="Resumen de la cotización">
-              <div className="sticky top-28 rounded-3xl bg-bmg-dark p-6 text-white shadow-xl sm:p-8">
-                <p className="font-semibold text-bmg-blue">
-                  Resumen
-                </p>
+            <aside aria-label="Resumen de la cotización" className="order-1">
+              <div className="rounded-2xl bg-bmg-dark px-5 py-6 text-white shadow-lg sm:px-6 lg:px-7 lg:py-7">
+                <div>
+                  <p className="font-semibold text-bmg-blue">
+                    Resumen
+                  </p>
 
-                <h2 className="mt-2 text-2xl font-bold">
-                  Resumen de la cotización
-                </h2>
+                  <h2 className="mt-1 text-xl font-bold sm:text-2xl">
+                    Resumen de la cotización
+                  </h2>
 
-                <dl className="mt-7 space-y-4">
-                  <div className="flex items-center justify-between gap-4 text-neutral-300">
-                    <dt>Unidades</dt>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-300">
+                    Revisa los productos de tu carrito y solicita una
+                    cotización. Nuestro equipo te enviará los precios.
+                  </p>
+                </div>
 
-                    <dd className="font-bold text-white">
-                      {totalItems}
-                    </dd>
+                <dl className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-0">
+                  <div className="flex items-center gap-4 lg:pr-8">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                      <Package
+                        size={24}
+                        strokeWidth={1.8}
+                        aria-hidden="true"
+                      />
+                    </span>
+
+                    <div>
+                      <dt className="text-sm font-medium text-neutral-300">
+                        Unidades
+                      </dt>
+
+                      <dd className="mt-1 text-2xl font-bold text-white">
+                        {totalItems}
+                      </dd>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 text-neutral-300">
-                    <dt>Productos diferentes</dt>
+                  <div className="flex items-center gap-4 border-white/15 sm:border-l sm:pl-6 lg:px-8">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                      <Layers3
+                        size={24}
+                        strokeWidth={1.8}
+                        aria-hidden="true"
+                      />
+                    </span>
 
-                    <dd className="font-bold text-white">
-                      {cartItems.length}
-                    </dd>
+                    <div>
+                      <dt className="text-sm font-medium text-neutral-300">
+                        Productos diferentes
+                      </dt>
+
+                      <dd className="mt-1 text-2xl font-bold text-white">
+                        {cartItems.length}
+                      </dd>
+                    </div>
                   </div>
 
                   {hasVisiblePrices ? (
-                    <div className="border-t border-white/15 pt-5">
-                      <div className="flex items-end justify-between gap-4">
-                        <dt className="font-semibold text-neutral-300">
+                    <div className="flex items-center gap-4 border-t border-white/15 pt-5 sm:col-span-2 lg:col-span-1 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span
+                          className="text-2xl font-semibold"
+                          aria-hidden="true"
+                        >
+                          $
+                        </span>
+                      </span>
+
+                      <div className="min-w-0">
+                        <dt className="text-sm font-semibold text-neutral-300">
                           {allPricesVisible
                             ? 'Subtotal'
                             : 'Subtotal parcial'}
                         </dt>
 
-                        <dd className="text-3xl font-bold text-white">
+                        <dd className="mt-1 text-2xl font-bold text-white">
                           {currencyFormatter.format(
                             Number(subtotal) || 0,
                           )}
                         </dd>
-                      </div>
 
-                      {!allPricesVisible && (
-                        <p className="mt-3 text-sm leading-6 text-neutral-400">
-                          Algunos productos no tienen
-                          precio disponible y serán
-                          cotizados por nuestro equipo.
-                        </p>
-                      )}
+                        {!allPricesVisible && (
+                          <p className="mt-2 max-w-sm text-xs leading-5 text-neutral-400">
+                            Algunos productos no tienen precio
+                            disponible y serán cotizados por nuestro
+                            equipo.
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div className="border-t border-white/15 pt-5">
-                      <p className="font-semibold leading-7 text-bmg-blue">
-                        Los precios serán informados al
-                        responder tu solicitud.
-                      </p>
+                    <div className="flex items-center gap-4 border-t border-white/15 pt-5 sm:col-span-2 lg:col-span-1 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span
+                          className="text-2xl font-semibold"
+                          aria-hidden="true"
+                        >
+                          $
+                        </span>
+                      </span>
+
+                      <div>
+                        <dt className="text-sm font-medium text-neutral-300">
+                          Precios
+                        </dt>
+
+                        <dd className="mt-1 text-sm font-semibold leading-6 text-bmg-blue">
+                          Serán informados al responder tu solicitud.
+                        </dd>
+                      </div>
                     </div>
                   )}
                 </dl>
 
-                <Link
-                  to="/solicitar-cotizacion"
-                  className="mt-7 inline-flex min-h-13 w-full items-center justify-center rounded-full bg-bmg-blue px-6 py-3 text-center font-bold text-bmg-dark transition hover:brightness-95"
-                >
-                  Solicitar cotización
-                </Link>
+                <div className="mt-6 flex flex-col gap-3 border-t border-white/15 pt-5 sm:flex-row sm:items-center">
+                  <Link
+                    to="/solicitar-cotizacion"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-bmg-blue px-5 py-2.5 text-center text-sm font-bold text-bmg-dark transition hover:brightness-95"
+                  >
+                    <FileText
+                      size={18}
+                      aria-hidden="true"
+                    />
 
-                <Link
-                  to="/productos"
-                  className="mt-3 inline-flex min-h-13 w-full items-center justify-center rounded-full border border-white/20 px-6 py-3 text-center font-bold text-white transition hover:border-bmg-blue hover:text-bmg-blue"
-                >
-                  Agregar más productos
-                </Link>
+                    Solicitar cotización
+                  </Link>
+
+                  <Link
+                    to="/productos"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-center text-sm font-bold text-white transition hover:border-bmg-blue hover:text-bmg-blue"
+                  >
+                    <CirclePlus
+                      size={18}
+                      aria-hidden="true"
+                    />
+
+                    Agregar más productos
+                  </Link>
+                </div>
               </div>
             </aside>
           </div>

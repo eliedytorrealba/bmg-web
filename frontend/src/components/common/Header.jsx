@@ -117,6 +117,15 @@ function Header() {
     !isAdmin &&
     user?.role === 'client'
 
+  const visibleNavigationLinks =
+    navigationLinks.filter(
+      (link) =>
+        !(
+          isAdmin &&
+          link.to === '/contacto'
+        ),
+    )
+
   useEffect(() => {
     function handleDocumentClick(event) {
       if (
@@ -208,18 +217,20 @@ function Header() {
           className="hidden items-center gap-9 lg:flex"
           aria-label="Navegación principal"
         >
-          {navigationLinks.map((link) => (
-            <NavLink
-              key={link.label}
-              to={link.to}
-              end={link.end}
-              className={
-                getDesktopNavigationClass
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
+          {visibleNavigationLinks.map(
+            (link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                end={link.end}
+                className={
+                  getDesktopNavigationClass
+                }
+              >
+                {link.label}
+              </NavLink>
+            ),
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -352,73 +363,74 @@ function Header() {
             )}
 
           {isClient && (
-  <NavLink
-    to="/mi-cuenta/favoritos"
-    aria-label={
-      favoriteCount > 0
-        ? `Favoritos, ${favoriteCount} productos guardados`
-        : 'Favoritos'
-    }
-    className={({ isActive }) => {
-      const baseClasses =
-        'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2'
+            <NavLink
+              to="/mi-cuenta/favoritos"
+              aria-label={
+                favoriteCount > 0
+                  ? `Favoritos, ${favoriteCount} productos guardados`
+                  : 'Favoritos'
+              }
+              className={({ isActive }) => {
+                const baseClasses =
+                  'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2'
 
-      if (isActive) {
-        return `${baseClasses} border-bmg-blue bg-bmg-blue/10 text-bmg-blue`
-      }
+                if (isActive) {
+                  return `${baseClasses} border-bmg-blue bg-bmg-blue/10 text-bmg-blue`
+                }
 
-      return `${baseClasses} border-neutral-300 bg-white text-bmg-dark hover:border-bmg-blue hover:text-bmg-blue`
-    }}
-  >
-    <Heart
-      size={20}
-      fill="none"
-      aria-hidden="true"
-    />
+                return `${baseClasses} border-neutral-300 bg-white text-bmg-dark hover:border-bmg-blue hover:text-bmg-blue`
+              }}
+            >
+              <Heart
+                size={20}
+                fill="none"
+                aria-hidden="true"
+              />
 
-    {favoriteCount > 0 && (
-      <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-bmg-blue px-1 text-[11px] font-bold leading-none text-bmg-dark ring-2 ring-white">
-        {favoriteCount > 99
-          ? '99+'
-          : favoriteCount}
-      </span>
-    )}
-  </NavLink>
-)}
+              {favoriteCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-bmg-blue px-1 text-[11px] font-bold leading-none text-bmg-dark ring-2 ring-white">
+                  {favoriteCount > 99
+                    ? '99+'
+                    : favoriteCount}
+                </span>
+              )}
+            </NavLink>
+          )}
 
-{isClient && (
-  <NavLink
-    to="/mi-cuenta/notificaciones"
-    aria-label={
-      unreadCount > 0
-        ? `Notificaciones, ${unreadCount} sin leer`
-        : 'Notificaciones'
-    }
-    className={({ isActive }) => {
-      const baseClasses =
-        'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2'
+          {isClient && (
+            <NavLink
+              to="/mi-cuenta/notificaciones"
+              aria-label={
+                unreadCount > 0
+                  ? `Notificaciones, ${unreadCount} sin leer`
+                  : 'Notificaciones'
+              }
+              className={({ isActive }) => {
+                const baseClasses =
+                  'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2'
 
-      if (isActive) {
-        return `${baseClasses} border-bmg-blue bg-bmg-blue/10 text-bmg-blue`
-      }
+                if (isActive) {
+                  return `${baseClasses} border-bmg-blue bg-bmg-blue/10 text-bmg-blue`
+                }
 
-      return `${baseClasses} border-neutral-300 bg-white text-bmg-dark hover:border-bmg-blue hover:text-bmg-blue`
-    }}
-  >
-    <Bell
-      size={20}
-      aria-hidden="true"
-    />
+                return `${baseClasses} border-neutral-300 bg-white text-bmg-dark hover:border-bmg-blue hover:text-bmg-blue`
+              }}
+            >
+              <Bell
+                size={20}
+                aria-hidden="true"
+              />
 
-    {unreadCount > 0 && (
-      <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-bmg-blue px-1 text-[11px] font-bold leading-none text-bmg-dark ring-2 ring-white">
-        {unreadCount > 99
-          ? '99+'
-          : unreadCount}
-      </span>
-    )}
-  </NavLink>
-)}
+              {unreadCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-bmg-blue px-1 text-[11px] font-bold leading-none text-bmg-dark ring-2 ring-white">
+                  {unreadCount > 99
+                    ? '99+'
+                    : unreadCount}
+                </span>
+              )}
+            </NavLink>
+          )}
+
           {isClient && (
             <NavLink
               to="/carrito"
@@ -481,18 +493,20 @@ function Header() {
         aria-label="Navegación móvil"
       >
         <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto pb-1">
-          {navigationLinks.map((link) => (
-            <NavLink
-              key={link.label}
-              to={link.to}
-              end={link.end}
-              className={
-                getMobileNavigationClass
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
+          {visibleNavigationLinks.map(
+            (link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                end={link.end}
+                className={
+                  getMobileNavigationClass
+                }
+              >
+                {link.label}
+              </NavLink>
+            ),
+          )}
 
           {!isLoading &&
             !isAuthenticated && (
@@ -539,8 +553,8 @@ function Header() {
                   className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-100 hover:text-bmg-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isLoggingOut
-                  ? 'Cerrando...'
-                  : 'Cerrar sesión'}
+                    ? 'Cerrando...'
+                    : 'Cerrar sesión'}
                 </button>
               </>
             )}

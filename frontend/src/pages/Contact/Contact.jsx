@@ -13,6 +13,7 @@ import {
   useState,
 } from 'react'
 
+import useAuth from '../../hooks/useAuth'
 import api from '../../services/api'
 
 const MESSAGE_MAX_LENGTH = 1000
@@ -27,6 +28,13 @@ const initialFormData = {
 }
 
 function Contact() {
+  const {
+    user,
+    isLoading,
+    isAuthenticated,
+    isAdmin,
+  } = useAuth()
+
   const [formData, setFormData] =
     useState(initialFormData)
 
@@ -38,6 +46,27 @@ function Contact() {
 
   const [submitError, setSubmitError] =
     useState('')
+
+  const isClient =
+    !isLoading &&
+    isAuthenticated &&
+    !isAdmin &&
+    user?.role === 'client'
+
+  const contactIdentity = {
+    name: isClient
+      ? user?.name ?? ''
+      : formData.name,
+    company: isClient
+      ? user?.company ?? ''
+      : formData.company,
+    email: isClient
+      ? user?.email ?? ''
+      : formData.email,
+    phone: isClient
+      ? user?.phone ?? ''
+      : formData.phone,
+  }
 
   useEffect(() => {
     if (!wasSubmitted) {
@@ -94,10 +123,10 @@ function Contact() {
     setSubmitError('')
 
     const contactData = {
-      name: formData.name.trim(),
-      company: formData.company.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
+      name: contactIdentity.name.trim(),
+      company: contactIdentity.company.trim(),
+      email: contactIdentity.email.trim(),
+      phone: contactIdentity.phone.trim(),
       subject: formData.subject.trim(),
       message: formData.message.trim(),
     }
@@ -108,7 +137,24 @@ function Contact() {
         contactData,
       )
 
-      setFormData(initialFormData)
+      setFormData((currentData) => ({
+        ...currentData,
+        name: isClient
+          ? currentData.name
+          : '',
+        company: isClient
+          ? currentData.company
+          : '',
+        email: isClient
+          ? currentData.email
+          : '',
+        phone: isClient
+          ? currentData.phone
+          : '',
+        subject: '',
+        message: '',
+      }))
+
       setWasSubmitted(true)
     } catch (error) {
       console.error(
@@ -209,9 +255,9 @@ function Contact() {
                     </h2>
 
                     <p className="mt-3 leading-7 text-neutral-600">
-                      Completa el formulario y
-                      nuestro equipo comercial
-                      responderá tu mensaje.
+                      {isClient
+                        ? 'Tus datos de contacto se completaron automáticamente. Solo debes indicar el asunto y escribir tu consulta.'
+                        : 'Completa el formulario y nuestro equipo comercial responderá tu mensaje.'}
                     </p>
                   </div>
 
@@ -231,14 +277,19 @@ function Contact() {
                         <input
                           type="text"
                           name="name"
-                          value={formData.name}
+                          value={contactIdentity.name}
                           onChange={handleChange}
                           required
                           maxLength={150}
+                          readOnly={isClient}
                           disabled={isSubmitting}
                           autoComplete="name"
                           placeholder="Tu nombre"
-                          className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
+                          className={`min-h-13 w-full rounded-2xl border border-neutral-300 py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-70 ${
+                            isClient
+                              ? 'cursor-default bg-neutral-100'
+                              : 'bg-white focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:bg-neutral-100'
+                          }`}
                         />
                       </span>
                     </label>
@@ -258,13 +309,18 @@ function Contact() {
                         <input
                           type="text"
                           name="company"
-                          value={formData.company}
+                          value={contactIdentity.company}
                           onChange={handleChange}
                           maxLength={150}
+                          readOnly={isClient}
                           disabled={isSubmitting}
                           autoComplete="organization"
                           placeholder="Nombre de la empresa"
-                          className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
+                          className={`min-h-13 w-full rounded-2xl border border-neutral-300 py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-70 ${
+                            isClient
+                              ? 'cursor-default bg-neutral-100'
+                              : 'bg-white focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:bg-neutral-100'
+                          }`}
                         />
                       </span>
                     </label>
@@ -284,14 +340,19 @@ function Contact() {
                         <input
                           type="email"
                           name="email"
-                          value={formData.email}
+                          value={contactIdentity.email}
                           onChange={handleChange}
                           required
                           maxLength={150}
+                          readOnly={isClient}
                           disabled={isSubmitting}
                           autoComplete="email"
                           placeholder="correo@empresa.com"
-                          className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
+                          className={`min-h-13 w-full rounded-2xl border border-neutral-300 py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-70 ${
+                            isClient
+                              ? 'cursor-default bg-neutral-100'
+                              : 'bg-white focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:bg-neutral-100'
+                          }`}
                         />
                       </span>
                     </label>
@@ -311,15 +372,20 @@ function Contact() {
                         <input
                           type="tel"
                           name="phone"
-                          value={formData.phone}
+                          value={contactIdentity.phone}
                           onChange={handleChange}
                           required
                           maxLength={20}
                           inputMode="tel"
+                          readOnly={isClient}
                           disabled={isSubmitting}
                           autoComplete="tel"
                           placeholder="+54 11 1234-5678"
-                          className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
+                          className={`min-h-13 w-full rounded-2xl border border-neutral-300 py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-70 ${
+                            isClient
+                              ? 'cursor-default bg-neutral-100'
+                              : 'bg-white focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:bg-neutral-100'
+                          }`}
                         />
                       </span>
                     </label>
@@ -427,10 +493,36 @@ function Contact() {
                           Teléfono
                         </p>
 
-                        <p className="mt-1 text-sm leading-6 text-neutral-600">
-                          Próximamente agregaremos
-                          el número comercial.
+                        <a
+                          href="tel:+5491133415962"
+                          className="mt-1 block text-sm font-semibold leading-6 text-bmg-blue transition hover:underline"
+                        >
+                          +54 9 11 3341-5962
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bmg-blue/10 text-bmg-blue">
+                        <MessageCircle
+                          size={19}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      <div>
+                        <p className="font-bold text-bmg-dark">
+                          WhatsApp
                         </p>
+
+                        <a
+                          href="https://wa.me/5491133415962"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 block text-sm font-semibold leading-6 text-bmg-blue transition hover:underline"
+                        >
+                          +54 9 11 3341-5962
+                        </a>
                       </div>
                     </div>
 
@@ -447,10 +539,12 @@ function Contact() {
                           Correo
                         </p>
 
-                        <p className="mt-1 text-sm leading-6 text-neutral-600">
-                          Próximamente agregaremos
-                          el correo comercial.
-                        </p>
+                        <a
+                          href="mailto:contacto@distribuidorabmg.com"
+                          className="mt-1 block break-all text-sm font-semibold leading-6 text-bmg-blue transition hover:underline"
+                        >
+                          contacto@distribuidorabmg.com
+                        </a>
                       </div>
                     </div>
 

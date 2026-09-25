@@ -188,8 +188,8 @@ function ProductDetail() {
 
   if (errorMessage || !product) {
     return (
-      <main className="bg-white px-4 py-20">
-        <section className="mx-auto max-w-2xl rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+      <main className="bg-white px-4 py-16">
+        <section className="mx-auto max-w-2xl rounded-3xl border border-red-200 bg-red-50 p-7 text-center">
           <h1 className="text-2xl font-bold text-red-700">
             No pudimos mostrar el producto
           </h1>
@@ -208,7 +208,7 @@ function ProductDetail() {
             }
             className="mt-6 rounded-full bg-bmg-dark px-6 py-3 font-bold text-white transition hover:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
           >
-            Volver al catálogo
+            Volver al Catálogo
           </button>
         </section>
       </main>
@@ -218,7 +218,7 @@ function ProductDetail() {
   return (
     <>
       <section className="border-b border-neutral-200 bg-bmg-light">
-        <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
           <nav
             aria-label="Navegación secundaria"
             className="flex flex-wrap items-center gap-2 text-sm text-neutral-500"
@@ -253,23 +253,23 @@ function ProductDetail() {
       </section>
 
       <main className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
           <Link
             to="/productos"
             className="inline-flex items-center gap-2 text-sm font-bold text-neutral-600 transition hover:text-bmg-blue"
           >
             <ArrowLeft
-              size={18}
+              size={17}
               aria-hidden="true"
             />
 
-            Volver al catálogo
+            Volver al Catálogo
           </Link>
 
-          <div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-14">
+          <div className="mt-6 grid min-w-0 gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10">
             <section className="min-w-0">
-              <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 lg:sticky lg:top-28">
-                <div className="flex aspect-square items-center justify-center p-8 sm:p-12">
+              <div className="mx-auto max-w-[500px] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 lg:sticky lg:top-28">
+                <div className="flex aspect-square items-center justify-center p-7 sm:p-9">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -277,15 +277,15 @@ function ProductDetail() {
                       className="h-full w-full object-contain"
                     />
                   ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-white px-8 text-center">
+                    <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-white px-6 text-center">
                       <Package
-                        size={64}
+                        size={52}
                         strokeWidth={1.4}
                         aria-hidden="true"
                         className="text-neutral-300"
                       />
 
-                      <p className="mt-5 text-lg font-bold text-neutral-400">
+                      <p className="mt-4 text-base font-bold text-neutral-400">
                         Imagen próximamente
                       </p>
                     </div>
@@ -295,19 +295,19 @@ function ProductDetail() {
             </section>
 
             <section className="min-w-0">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="max-w-full break-words rounded-full bg-bmg-blue/10 px-4 py-2 text-sm font-bold text-bmg-blue">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="max-w-full break-words rounded-full bg-bmg-blue/10 px-3 py-1.5 text-xs font-bold text-bmg-blue">
                   {product.brand?.name ??
                     'Sin marca'}
                 </span>
 
-                <span className="max-w-full break-words rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-600">
+                <span className="max-w-full break-words rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-600">
                   {product.category?.name ??
                     'Sin categoría'}
                 </span>
               </div>
 
-              <h1 className="mt-6 min-w-0 break-words text-4xl font-bold tracking-tight text-bmg-dark sm:text-5xl">
+              <h1 className="mt-4 min-w-0 break-words text-3xl font-bold tracking-tight text-bmg-dark sm:text-4xl">
                 {product.name}
               </h1>
 
@@ -321,10 +321,10 @@ function ProductDetail() {
                   aria-pressed={
                     isFavorite(product.id)
                   }
-                  className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 py-2.5 text-sm font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
+                  className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-bmg-dark bg-white px-4 py-2 text-sm font-bold text-bmg-dark transition hover:border-bmg-blue hover:text-bmg-blue disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmg-blue focus-visible:ring-offset-2"
                 >
                   <Heart
-                    size={16}
+                    size={15}
                     fill={
                       isFavorite(product.id)
                         ? 'currentColor'
@@ -346,24 +346,24 @@ function ProductDetail() {
               {favoriteErrorMessage && (
                 <p
                   role="alert"
-                  className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+                  className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
                 >
                   {favoriteErrorMessage}
                 </p>
               )}
 
-              <p className="mt-4 break-all text-sm font-semibold text-neutral-500">
+              <p className="mt-3 break-all text-sm font-semibold text-neutral-500">
                 Código: {product.code}
               </p>
 
-              <div className="mt-8 border-y border-neutral-200 py-7">
+              <div className="mt-6 border-y border-neutral-200 py-5">
                 {product.can_view_price ? (
                   <>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Precio para clientes
                     </p>
 
-                    <p className="mt-2 break-words text-4xl font-bold text-bmg-dark">
+                    <p className="mt-1.5 break-words text-3xl font-bold text-bmg-dark">
                       {currencyFormatter.format(
                         Number(product.price),
                       )}
@@ -371,11 +371,11 @@ function ProductDetail() {
                   </>
                 ) : isAdmin ? (
                   <>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Precio
                     </p>
 
-                    <p className="mt-2 text-2xl font-bold text-bmg-dark">
+                    <p className="mt-2 text-xl font-bold text-bmg-dark">
                       Disponible según la lista
                       de precios asignada al
                       cliente
@@ -383,33 +383,33 @@ function ProductDetail() {
                   </>
                 ) : isAuthenticated ? (
                   <>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Precio
                     </p>
 
-                    <p className="mt-2 text-2xl font-bold text-bmg-blue">
+                    <p className="mt-2 text-xl font-bold text-bmg-blue">
                       Precio no disponible para
                       esta cuenta
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Precio
                     </p>
 
-                    <p className="mt-2 text-3xl font-bold text-bmg-blue">
+                    <p className="mt-2 text-2xl font-bold text-bmg-blue">
                       Inicia sesión para consultar
                     </p>
                   </>
                 )}
               </div>
 
-              <dl className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="min-w-0 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
-                  <dt className="flex items-center gap-2 text-sm font-bold text-neutral-500">
+              <dl className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="min-w-0 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                  <dt className="flex items-center gap-2 text-xs font-bold text-neutral-500">
                     <Tag
-                      size={18}
+                      size={16}
                       aria-hidden="true"
                       className="shrink-0 text-bmg-blue"
                     />
@@ -417,15 +417,15 @@ function ProductDetail() {
                     Código
                   </dt>
 
-                  <dd className="mt-2 break-all text-lg font-bold text-bmg-dark">
+                  <dd className="mt-2 break-all text-base font-bold text-bmg-dark">
                     {product.code}
                   </dd>
                 </div>
 
-                <div className="min-w-0 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
-                  <dt className="flex items-center gap-2 text-sm font-bold text-neutral-500">
+                <div className="min-w-0 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                  <dt className="flex items-center gap-2 text-xs font-bold text-neutral-500">
                     <Package
-                      size={18}
+                      size={16}
                       aria-hidden="true"
                       className="shrink-0 text-bmg-blue"
                     />
@@ -433,31 +433,31 @@ function ProductDetail() {
                     Categoría
                   </dt>
 
-                  <dd className="mt-2 break-words text-lg font-bold text-bmg-dark">
+                  <dd className="mt-2 break-words text-base font-bold text-bmg-dark">
                     {product.category?.name ??
                       'Sin categoría'}
                   </dd>
                 </div>
               </dl>
 
-              <div className="mt-8 rounded-3xl border border-neutral-200 bg-bmg-light p-6">
-                <h2 className="text-lg font-bold text-bmg-dark">
+              <div className="mt-6 rounded-2xl border border-neutral-200 bg-bmg-light p-5">
+                <h2 className="text-base font-bold text-bmg-dark">
                   Información comercial
                 </h2>
 
-                <ul className="mt-5 space-y-4">
+                <ul className="mt-4 space-y-3">
                   {isAdmin ? (
                     <>
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           Los precios dependen de
                           la lista de precios
                           asignada a cada cliente.
@@ -465,15 +465,15 @@ function ProductDetail() {
                       </li>
 
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           La compra y solicitud de
                           cotización están
                           disponibles para cuentas
@@ -484,15 +484,15 @@ function ProductDetail() {
                   ) : isClient ? (
                     <>
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           El precio mostrado
                           corresponde a tu lista
                           de precios asignada.
@@ -500,15 +500,15 @@ function ProductDetail() {
                       </li>
 
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           Puedes agregar productos
                           y solicitar una
                           cotización desde tu
@@ -519,15 +519,15 @@ function ProductDetail() {
                   ) : (
                     <>
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           Los precios y las
                           condiciones comerciales
                           están disponibles para
@@ -536,15 +536,15 @@ function ProductDetail() {
                       </li>
 
                       <li className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bmg-blue/15 text-bmg-blue">
                           <Check
-                            size={15}
+                            size={12}
                             strokeWidth={3}
                             aria-hidden="true"
                           />
                         </span>
 
-                        <span className="text-sm leading-6 text-neutral-600">
+                        <span className="text-sm leading-5 text-neutral-600">
                           Inicia sesión para
                           agregar productos y
                           solicitar una
@@ -557,7 +557,7 @@ function ProductDetail() {
               </div>
 
               {canSelectQuantity && (
-                <div className="mt-8 flex flex-wrap items-center gap-5">
+                <div className="mt-6 flex flex-wrap items-center gap-4">
                   <label
                     htmlFor="product-quantity"
                     className="whitespace-nowrap text-sm font-bold text-bmg-dark"
@@ -571,10 +571,10 @@ function ProductDetail() {
                       onClick={decreaseQuantity}
                       disabled={quantity <= 1}
                       aria-label="Reducir cantidad"
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-bmg-dark transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-bmg-dark transition enabled:hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Minus
-                        size={18}
+                        size={16}
                         aria-hidden="true"
                       />
                     </button>
@@ -589,17 +589,17 @@ function ProductDetail() {
                       onChange={
                         handleQuantityChange
                       }
-                      className="h-11 w-14 appearance-none bg-transparent text-center font-bold text-bmg-dark outline-none"
+                      className="h-9 w-12 appearance-none bg-transparent text-center text-sm font-bold text-bmg-dark outline-none"
                     />
 
                     <button
                       type="button"
                       onClick={increaseQuantity}
                       aria-label="Aumentar cantidad"
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-bmg-dark transition hover:bg-neutral-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-bmg-dark transition hover:bg-neutral-100"
                     >
                       <Plus
-                        size={18}
+                        size={16}
                         aria-hidden="true"
                       />
                     </button>
@@ -608,7 +608,7 @@ function ProductDetail() {
               )}
 
               {isClient && (
-                <div className="mt-8">
+                <div className="mt-6">
                   <AddToCartButton
                     product={cartProduct}
                     quantity={

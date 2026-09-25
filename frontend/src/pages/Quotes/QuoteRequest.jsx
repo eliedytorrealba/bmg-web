@@ -14,11 +14,11 @@ import {
 } from 'react'
 import { Link } from 'react-router-dom'
 
+import useAuth from '../../hooks/useAuth'
 import useCart from '../../hooks/useCart'
 import api from '../../services/api'
 
 const MESSAGE_MAX_LENGTH = 1000
-const PHONE_MAX_LENGTH = 20
 
 const currencyFormatter =
   new Intl.NumberFormat('es-AR', {
@@ -28,14 +28,12 @@ const currencyFormatter =
   })
 
 const initialFormData = {
-  name: '',
-  company: '',
-  email: '',
-  phone: '',
   message: '',
 }
 
 function QuoteRequest() {
+  const { user } = useAuth()
+
   const {
     cartItems,
     totalItems,
@@ -101,30 +99,14 @@ function QuoteRequest() {
   }, [cartItems])
 
   function handleChange(event) {
-    const {
-      name,
-      value,
-    } = event.target
+    const nextValue = event.target.value.slice(
+      0,
+      MESSAGE_MAX_LENGTH,
+    )
 
-    let nextValue = value
-
-    if (name === 'phone') {
-      nextValue = value
-        .replace(/[^\d+\-()\s]/g, '')
-        .slice(0, PHONE_MAX_LENGTH)
-    }
-
-    if (name === 'message') {
-      nextValue = value.slice(
-        0,
-        MESSAGE_MAX_LENGTH,
-      )
-    }
-
-    setFormData((currentData) => ({
-      ...currentData,
-      [name]: nextValue,
-    }))
+    setFormData({
+      message: nextValue,
+    })
 
     if (submitError) {
       setSubmitError('')
@@ -142,20 +124,22 @@ function QuoteRequest() {
       return
     }
 
+    if (
+      !user?.name?.trim() ||
+      !user?.email?.trim() ||
+      !user?.phone?.trim()
+    ) {
+      setSubmitError(
+        'Completa tu nombre, correo electrónico y teléfono en Mi cuenta antes de solicitar una cotización.',
+      )
+
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError('')
 
     const quoteData = {
-      customer: {
-        name: formData.name.trim(),
-        company:
-          formData.company.trim(),
-        email:
-          formData.email.trim(),
-        phone:
-          formData.phone.trim(),
-      },
-
       message:
         formData.message.trim(),
 
@@ -228,8 +212,8 @@ function QuoteRequest() {
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-600">
             Revisa los productos seleccionados y
-            completa tus datos para enviar la
-            solicitud a nuestro equipo comercial.
+            envía la solicitud con los datos asociados
+            a tu cuenta.
           </p>
         </div>
       </section>
@@ -286,7 +270,7 @@ function QuoteRequest() {
                   </p>
 
                   <h2 className="mt-2 text-2xl font-bold text-bmg-dark">
-                    Completa tus datos
+                    Datos de tu cuenta
                   </h2>
                 </div>
 
@@ -305,15 +289,10 @@ function QuoteRequest() {
 
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        maxLength={150}
-                        disabled={isSubmitting}
-                        autoComplete="name"
-                        placeholder="Tu nombre"
-                        className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100"
+                        value={user?.name ?? ''}
+                        readOnly
+                        aria-readonly="true"
+                        className="min-h-13 w-full cursor-not-allowed rounded-2xl border border-neutral-200 bg-neutral-100 py-3 pl-11 pr-4 text-neutral-600 outline-none"
                       />
                     </span>
                   </label>
@@ -332,14 +311,10 @@ function QuoteRequest() {
 
                       <input
                         type="text"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        maxLength={150}
-                        disabled={isSubmitting}
-                        autoComplete="organization"
-                        placeholder="Nombre de la empresa"
-                        className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100"
+                        value={user?.company ?? 'No informada'}
+                        readOnly
+                        aria-readonly="true"
+                        className="min-h-13 w-full cursor-not-allowed rounded-2xl border border-neutral-200 bg-neutral-100 py-3 pl-11 pr-4 text-neutral-600 outline-none"
                       />
                     </span>
                   </label>
@@ -358,15 +333,10 @@ function QuoteRequest() {
 
                       <input
                         type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        maxLength={150}
-                        disabled={isSubmitting}
-                        autoComplete="email"
-                        placeholder="correo@empresa.com"
-                        className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100"
+                        value={user?.email ?? ''}
+                        readOnly
+                        aria-readonly="true"
+                        className="min-h-13 w-full cursor-not-allowed rounded-2xl border border-neutral-200 bg-neutral-100 py-3 pl-11 pr-4 text-neutral-600 outline-none"
                       />
                     </span>
                   </label>
@@ -385,23 +355,26 @@ function QuoteRequest() {
 
                       <input
                         type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required
-                        maxLength={
-                          PHONE_MAX_LENGTH
-                        }
-                        inputMode="tel"
-                        pattern="[0-9+\-()\s]+"
-                        disabled={isSubmitting}
-                        autoComplete="tel"
-                        placeholder="+54 11 1234-5678"
-                        className="min-h-13 w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-bmg-dark outline-none transition placeholder:text-neutral-400 focus:border-bmg-blue focus:ring-3 focus:ring-bmg-blue/15 disabled:cursor-not-allowed disabled:bg-neutral-100"
+                        value={user?.phone ?? ''}
+                        readOnly
+                        aria-readonly="true"
+                        className="min-h-13 w-full cursor-not-allowed rounded-2xl border border-neutral-200 bg-neutral-100 py-3 pl-11 pr-4 text-neutral-600 outline-none"
                       />
                     </span>
                   </label>
                 </div>
+
+                <p className="mt-4 text-sm leading-6 text-neutral-500">
+                  Estos datos pertenecen a tu cuenta y no pueden modificarse
+                  desde la cotización. Para actualizarlos, ve a{' '}
+                  <Link
+                    to="/mi-cuenta"
+                    className="font-bold text-bmg-blue hover:underline"
+                  >
+                    Mi cuenta
+                  </Link>
+                  .
+                </p>
 
                 <label className="mt-6 block">
                   <span className="text-sm font-bold text-bmg-dark">

@@ -614,7 +614,7 @@ function AdminPriceListDetail() {
               aria-hidden="true"
             />
 
-            Volver a listas de precios
+            Volver a Listas de Precios
           </Link>
 
           <section className="mt-6 rounded-3xl border border-red-200 bg-red-50 px-6 py-12 text-center shadow-sm">
@@ -639,7 +639,7 @@ function AdminPriceListDetail() {
             aria-hidden="true"
           />
 
-          Volver a listas de precios
+          Volver a Listas de Precios
         </Link>
 
         <section className="mt-6 rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">

@@ -473,7 +473,7 @@ function AdminCatalog() {
               to="/admin"
               className="text-sm font-bold text-bmg-blue transition hover:text-bmg-dark"
             >
-              ← Volver al panel
+              ← Volver al Panel
             </Link>
           </div>
 

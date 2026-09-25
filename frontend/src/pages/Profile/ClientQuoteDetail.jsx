@@ -138,7 +138,7 @@ function ClientQuoteDetail() {
               aria-hidden="true"
             />
 
-            Volver a Mis cotizaciones
+            Volver a Mis Cotizaciones
           </Link>
         </section>
       </main>
@@ -165,7 +165,7 @@ function ClientQuoteDetail() {
               aria-hidden="true"
             />
 
-            Volver a Mis cotizaciones
+            Volver a Mis Cotizaciones
           </Link>
 
           <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">

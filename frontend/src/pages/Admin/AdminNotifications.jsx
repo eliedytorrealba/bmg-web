@@ -812,7 +812,7 @@ function AdminNotifications() {
             aria-hidden="true"
           />
 
-          Volver al panel
+          Volver al Panel
         </Link>
 
         <section className="mt-6 rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
